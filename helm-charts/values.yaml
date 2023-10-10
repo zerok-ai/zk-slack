@@ -1,0 +1,121 @@
+# Default values for zerok-dashboard.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+global:
+  dockerBase: "us-west1-docker.pkg.dev/zerok-dev/zkcloud"
+  zkcloud:
+    host: ""
+
+replicaCount: 1
+pixie:
+  base: "px"
+router:
+  zkApiServer:  "http://zk-api-server.zkcloud.svc.cluster.local"
+  zkDashboardUrl:  "https://dashboard"
+  zkWSP: "http://zk-wsp-server.zkcloud.svc.cluster.local:8989/request"
+  zkWSPRouter:
+    zkAxon:
+      identifier: /axon
+      endpoint: "http://zk-axon.zk-client.svc.cluster.local:80"
+    zkGPT:
+      identifier: /gpt
+      endpoint: "http://zk-gpt.zk-client.svc.cluster.local:80"
+redis:
+  host:  "redis-master.redis.svc.cluster.local"
+  port: 6379
+  readTimeout: 12
+suprsend:
+  workspaceKey:  ""
+  workspaceSecret:  ""
+postgres:
+  host: "postgres.plc.svc.cluster.local"
+  port: 5432
+  user:  "pl"
+  password:  ""
+  database: "pl"
+
+zkGpt:
+  openAI_key: ""
+  pinecone_key: ""
+  pinecone_env: ""
+  pinecone_index: ""
+
+image:
+  repo: "zk-auth"
+  pullPolicy: Always
+  tag: "latest"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+# fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+# runAsUser: 1000
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-cluster-issuer
+  hosts:
+    - host: ""
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+    - host: ""
+      paths:
+        - path: /v1/
+          pathType: ImplementationSpecific
+  tls:
+    - secretName: ""
+      hosts:
+        - ""
+        - ""
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+#   memory: 128Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

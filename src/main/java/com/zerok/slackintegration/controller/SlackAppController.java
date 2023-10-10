@@ -1,18 +1,28 @@
 package com.zerok.slackintegration.controller;
 
-import com.slack.api.bolt.App;
-import com.slack.api.bolt.servlet.SlackAppServlet;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.annotation.WebServlet;
+import java.util.Map;
 
 
-@WebServlet("/slack/events")
-public class SlackAppController extends SlackAppServlet {
+@RestController
+@RequestMapping("/slack/events")
+public class SlackAppController {
 
-    public SlackAppController(App app) {
-        super(app);
+    //ALL slack events that happened on slack will come via this channel
+
+    @PostMapping("/app-uninstalled")
+    public ResponseEntity<Void> handleAppUninstalledEvent(@RequestBody Map<String, Object> payload) {
+        // Handle the app_uninstalled event
+        // Your logic to handle app uninstallation goes here
+
+        return ResponseEntity.ok().build();
     }
+
 }
 
 

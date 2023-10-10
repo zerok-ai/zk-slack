@@ -1,5 +1,38 @@
 server:
   port: 3000
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    password: ""
+#    url: jdbc:postgresql://postgres.plc.svc.cluster.local:5432/pl
+    url: jdbc:postgresql://localhost:5432/pl
+    username: "pl"
+  jpa:
+    hibernate:
+      ddl-auto: update
+  entity-scan:
+    base-package: com.zerok.slackintegration.entities
 
 logging.level:
   com.slack.api: DEBUG
+
+slack:
+  scopes: >
+    app_mentions:read,
+    channels:history,
+    channels:join,
+    channels:read,
+    chat:write,
+    emoji:read,
+    groups:read
+    im:read
+    mpim:read
+    im:history,
+    incoming-webhook,
+    users:read,
+    chat:write.public
+  clientId: "2752528759122.5974500920640"
+  clientSecret: "5a73604214192016035cf5871e1932a9"
+  redirectUri: "https://81e1-2406-7400-9a-c23-e1ac-c5cc-1bda-961c.ngrok-free.app/slack/oauth/redirect"
+  signingSecret: "09b15216bb3371d41f72b4d4415b132f"
+  appId: "A05UNEQT2JU"

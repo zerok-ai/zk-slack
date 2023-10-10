@@ -12,9 +12,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
+import java.util.List;
 
 @RestController
-@RequestMapping("/publish")
+@RequestMapping("/slack/publish")
 public class ZeroKInferenceController {
 
     private final ZeroKSlackIntegrationService slackIntegrationService;
@@ -25,7 +26,7 @@ public class ZeroKInferenceController {
     }
 
     @PostMapping("/inference")
-    public String retrieveCoursesForStudent(@RequestBody  ZeroKIssueInference zeroKIssueInference) throws SlackApiException, IOException {
+    public List<String> retrieveCoursesForStudent(@RequestBody  ZeroKIssueInference zeroKIssueInference) throws SlackApiException, IOException {
         return slackIntegrationService.publishInferenceToSlack(zeroKIssueInference);
     }
 

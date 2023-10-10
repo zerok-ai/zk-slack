@@ -17,7 +17,7 @@ public class ZeroKIssueInference {
 
     private String timestamp;
 
-    private String clientId;
+    private String org;
 
     private String issueUrl;
 }
