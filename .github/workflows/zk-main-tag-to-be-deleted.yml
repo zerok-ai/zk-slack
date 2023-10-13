@@ -1,0 +1,240 @@
+name: CICD (zk-runner TAG)
+on:
+  push:
+    tags: #r/<CLUSTER-NAME>/<DOCKER-TAG-OR-VERSION>
+      - 'oldr/**'
+  workflow_dispatch:
+    inputs:
+      DOCKER_TAG:
+        description: 'Docker Image Tag'
+        required: true
+        default: 'latest'
+      GKE_CLUSTER:
+        description: 'Cluster Name'
+        required: true
+        default: 'pxclient01'
+env:
+  NS: ${{ vars.NS }}
+  GOOS: ${{ vars.GOOS }}
+  GOARCH: ${{ vars.GOARCH }}
+  DOCKER_TAG: ${{ github.event.inputs.DOCKER_TAG }}
+  GKE_CLUSTER: ${{ github.event.inputs.GKE_CLUSTER }}
+  CGO_ENABLED: ${{ vars.CGO_ENABLED }}
+  GKE_SA_KEY: ${{ secrets.GKE_SA_KEY }}
+  GKE_ZONE : ${{ vars.GKE_ZONE }}
+  ZK_DOMAIN_CORE: ${{ vars.ZK_DOMAIN_CORE }}
+  AXON_DOMAIN: ${{ vars.AXON_DOMAIN }}
+  WSP_DOMAIN: ${{ vars.WSP_DOMAIN }}
+  GPT_DOMAIN: ${{ vars.GPT_DOMAIN }}
+  DOCKER_REG: ${{ vars.DOCKER_REG }}
+  PROJECT_ID:  ${{ vars.PROJECT_ID }}
+  DOCKER_REPO:  ${{ vars.DOCKER_REPO }}
+  APP_NAME:  ${{ vars.APP_NAME }}
+  POSTGRES_PASSWORD:  ${{ secrets.POSTGRES_PASSWORD }}
+  POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+  SUPRSEND_WORKSPACEKEY: ${{ secrets.SUPRSEND_WORKSPACEKEY }}
+  OPENAI_KEY: ${{ secrets.OPENAI_KEY }}
+  PINECONE_ENV: ${{ secrets.PINECONE_ENV }}
+  PINECONE_KEY: ${{ secrets.PINECONE_KEY }}
+  PINECONE_INDEX: ${{ secrets.PINECONE_INDEX }}
+  SUPRSEND_WORKSPACESECRET: ${{ secrets.SUPRSEND_WORKSPACESECRET }}
+  POSTGRES_DB: ${{ vars.POSTGRES_DB }}
+  POSTGRES_HOST: ${{ vars.POSTGRES_HOST }}
+  REDIS_HOST: ${{ vars.REDIS_HOST }}
+  ROUTER_ZKAPISERVER: ${{ vars.ROUTER_ZKAPISERVER }}
+  BUILD_AND_PUSH: true
+  DEPLOY: true
+
+jobs:
+  init:
+    runs-on: zk-self-hosted
+    outputs:
+      ENVIRONMENT: ${{ steps.extractEnvironment.outputs.EXTRACTED_ENVIRONMENT }}
+      CLUSTERNAME: ${{ steps.extractClusterInfo.outputs.TAG_CLUSTERNAME }}
+      VERSION: ${{ steps.extractClusterInfo.outputs.TAG_VERSION }}
+    steps:
+      - name: Set tag envt var
+        run: |
+          echo "GIT_TAG=${GITHUB_REF#refs/*/}" >> "$GITHUB_ENV"
+
+      - name: Extract clusterName and version
+        id: extractClusterInfo
+        run: |
+          if [ "$DOCKER_TAG" == "" ]; then
+            part1=$(echo "$GIT_TAG" | cut -d'/' -f2)
+            part2=$(echo "$GIT_TAG" | cut -d'/' -f3)
+            echo "TAG_CLUSTERNAME=$part1" >> $GITHUB_OUTPUT
+            echo "TAG_VERSION=$part2" >> $GITHUB_OUTPUT
+            clusterName=$part1
+          else
+            echo "TAG_CLUSTERNAME=$GKE_CLUSTER" >> $GITHUB_OUTPUT
+            echo "TAG_VERSION=$DOCKER_TAG" >> $GITHUB_OUTPUT
+            clusterName=$GKE_CLUSTER
+          fi
+          TAG_CLUSTERNAME_CAPITAL=$(echo "$clusterName" | tr '[:lower:]' '[:upper:]')
+          echo "TAG_CLUSTERNAME_CAPITAL=$TAG_CLUSTERNAME_CAPITAL" >> $GITHUB_OUTPUT
+
+      - name: Check output
+        id: extractEnvironment
+        env:
+          ORG_VARIABLE: ${{ vars[format('{0}_ENV', steps.extractClusterInfo.outputs.TAG_CLUSTERNAME_CAPITAL)] }}
+        run: |
+          echo "EXTRACTED_ENVIRONMENT=$ORG_VARIABLE" >> $GITHUB_OUTPUT
+          echo "$ORG_VARIABLE"
+
+      - name: Dump steps context
+        env:
+          STEPS_CONTEXT: ${{ toJson(steps) }}
+        run: echo "$STEPS_CONTEXT"
+
+  print-envs:
+    needs: init
+    runs-on: zk-self-hosted
+    env:
+      CLUSTERNAME: ${{ needs.init.outputs.CLUSTERNAME }}
+      VERSION: ${{ needs.init.outputs.VERSION }}
+      ENVIRONMENT: ${{ needs.init.outputs.ENVIRONMENT }}
+    environment:
+      name: ${{ needs.init.outputs.ENVIRONMENT }}
+    steps:
+      - name: Print environment vars
+        run: |
+          echo "GIT_TAG=$GIT_TAG"
+          echo "CLUSTER_NAME=$CLUSTERNAME"
+          echo "DOCKER_TAG=$VERSION"
+          echo "GKE_ZONE=$GKE_ZONE"
+          echo "DOCKER_REPO=$DOCKER_REPO"
+          echo "K8S_NAMESPACE=$NS"
+          echo "ENVIRONMENT=$ENVIRONMENT"
+
+  ##############
+  app-build:
+    needs: init
+    runs-on: zk-self-hosted
+    env:
+      CLUSTERNAME: ${{ needs.init.outputs.CLUSTERNAME }}
+      VERSION: ${{ needs.init.outputs.VERSION }}
+      ENVIRONMENT: ${{ needs.init.outputs.ENVIRONMENT }}
+    environment:
+      name: ${{ needs.init.outputs.ENVIRONMENT }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Build
+        if: ${{ env.BUILD_AND_PUSH == 'true' }}
+        run: go build -o build/zk-auth ./cmd/zk-auth/
+
+      - name: Uploading Helm Charts (for deploy)
+        uses: actions/upload-artifact@v3
+        if: ${{ env.DEPLOY == 'true' }}
+        with:
+          name: helm-charts
+          path: |
+            helm-charts
+
+      - name: Uploading Build files (for docker push)
+        uses: actions/upload-artifact@v3
+        if: ${{ env.BUILD_AND_PUSH == 'true' }}
+        with:
+          name: build-artifacts
+          path: |
+            build/zk-auth
+            internal/pixie/config/invite-user.yaml
+            internal/pixie/config/login-flow.yaml
+            Dockerfile
+
+  docker-build:
+    needs: [ init,app-build ]
+    env:
+      CLUSTERNAME: ${{ needs.init.outputs.CLUSTERNAME }}
+      VERSION: ${{ needs.init.outputs.VERSION }}
+      ENVIRONMENT: ${{ needs.init.outputs.ENVIRONMENT }}
+    environment:
+      name: ${{ needs.init.outputs.ENVIRONMENT }}
+    runs-on: zk-self-hosted
+    steps:
+      - id: 'auth'
+        if: ${{ env.BUILD_AND_PUSH == 'true' }}
+        name: 'Authenticate to Google Cloud'
+        uses: 'google-github-actions/auth@v0'
+        with:
+          credentials_json: '${{ env.GKE_SA_KEY }}'
+
+      - name: login to docker registry
+        if: ${{ env.BUILD_AND_PUSH == 'true' }}
+        run: |
+          gcloud auth configure-docker $DOCKER_REG --quiet
+
+      - uses: actions/download-artifact@v3
+        if: ${{ env.BUILD_AND_PUSH == 'true' }}
+        with:
+          name: build-artifacts
+
+      - name: Docker build
+        if: ${{ env.BUILD_AND_PUSH == 'true' }}
+        run: |-
+          docker build  --tag "$DOCKER_REG/$PROJECT_ID/$DOCKER_REPO/$APP_NAME:$GITHUB_SHA" .
+
+      - name: Docker Tag
+        if: ${{ env.BUILD_AND_PUSH == 'true' }}
+        run: |-
+          docker tag "$DOCKER_REG/$PROJECT_ID/$DOCKER_REPO/$APP_NAME:$GITHUB_SHA" "$DOCKER_REG/$PROJECT_ID/$DOCKER_REPO/$APP_NAME:$VERSION"
+
+      - name: Docker push
+        if: ${{ env.BUILD_AND_PUSH == 'true' }}
+        run: |-
+          docker push "$DOCKER_REG/$PROJECT_ID/$DOCKER_REPO/$APP_NAME:$GITHUB_SHA"
+          docker push "$DOCKER_REG/$PROJECT_ID/$DOCKER_REPO/$APP_NAME:$VERSION"
+
+  deploy:
+    needs: [ init,app-build,docker-build ]
+    env:
+      CLUSTERNAME: ${{ needs.init.outputs.CLUSTERNAME }}
+      VERSION: ${{ needs.init.outputs.VERSION }}
+      ENVIRONMENT: ${{ needs.init.outputs.ENVIRONMENT }}
+      ENV: ${{ needs.init.outputs.ENVIRONMENT }}
+      ZK_DOMAIN: ${{ needs.init.outputs.CLUSTERNAME }}.${{vars.ZK_DOMAIN_CORE}}
+    environment:
+      name: ${{ needs.init.outputs.ENVIRONMENT }}
+    runs-on: zk-self-hosted
+    steps:
+
+      - id: 'auth'
+        if: ${{ env.DEPLOY == 'true' }}
+        name: 'Authenticate to Google Cloud'
+        uses: 'google-github-actions/auth@v0'
+        with:
+          credentials_json: '${{ env.GKE_SA_KEY }}'
+
+      - id: 'get-credentials'
+        if: ${{ env.DEPLOY == 'true' }}
+        uses: 'google-github-actions/get-gke-credentials@v1'
+        with:
+          cluster_name: '${{ env.CLUSTERNAME }}'
+          location: '${{ env.GKE_ZONE }}'
+
+      - uses: actions/download-artifact@v3
+        if: ${{ env.DEPLOY == 'true' }}
+        with:
+          name: helm-charts
+
+#      - name: copy plc db secrets to ${{ vars.NS }}
+#        if: ${{ env.DEPLOY == 'true' }}
+#        run: |-
+#          kubectl create namespace $NS --dry-run=client -o yaml | kubectl apply -f -
+#          kubectl -n plc get secret pl-db-secrets -o yaml | yq 'del(.metadata.creationTimestamp, .metadata.uid, .metadata.resourceVersion, .metadata.namespace)' | kubectl apply --namespace $NS  -f -
+
+      - name: Deploy
+        if: ${{ env.DEPLOY == 'true' }}
+        run: |-
+          helm --install  \
+          --set=image.repository=$DOCKER_REG/$PROJECT_ID/$DOCKER_REPO/$APP_NAME \
+          --set=image.tag=$GITHUB_SHA \
+          --set global.zkcloud.host=$ZK_CLOUD_DOMAIN \
+          --set=suprsend.workspaceKey=$SUPRSEND_WORKSPACEKEY \
+          --set=suprsend.workspaceSecret=$SUPRSEND_WORKSPACESECRET \
+          upgrade $APP_NAME \
+           -f ./helm-charts/values.yaml ./helm-charts/ \
+           --create-namespace \
+           --namespace $NS
