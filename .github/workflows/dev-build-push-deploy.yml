@@ -52,6 +52,7 @@ jobs:
       PROJECT_ID: ${{ needs.init.outputs.PROJECT_ID }}
       ENVIRONMENT: ${{ needs.init.outputs.ENVIRONMENT }}
     secrets:
-      HELM_SECRETS_ARGS: ${{ format('--set=zkGpt.openAI_key={0} --set=zkGpt.pinecone_key={1} --set=zkGpt.pinecone_env={2} --set=zkGpt.pinecone_index={3}', secrets.OPENAI_KEY_BASE64_DEV, secrets.PINECONE_APIKEY_BASE64_DEV, secrets.PINECONE_ENVIRONMENT_BASE64_DEV, secrets.PINECONE_INDEX_KEY_BASE64_DEV) }}
+      secrets:
+      HELM_SECRETS_ARGS: ${{ format('--set=slack.clientId={0} --set=slack.clientSecret={1} --set=slack.signingSecret={2} --set=slack.appId={3}', secrets.SLACK_CLIENT_ID, secrets.SLACK_CLIENT_SECRET, secrets.SLACK_SIGNING_SECRET, secrets.SLACK_APP_ID) }}
       GKE_SA_KEY: ${{ secrets.GKE_SA_KEY_DEV }}
     needs: [init,build-push]

@@ -15,9 +15,9 @@ public class ZeroKIssueInference {
 
     private String inference;
 
-    private String timestamp;
+    private String issueTimestamp;
 
-    private String org;
+    private String clusterId;
 
     private String issueUrl;
 }

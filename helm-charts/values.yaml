@@ -7,23 +7,19 @@ global:
     host: ""
 
 replicaCount: 1
-pixie:
-  base: "px"
-router:
-  zkApiServer:  "http://zk-api-server.zkcloud.svc.cluster.local"
-  zkDashboardUrl:  "https://dashboard"
-  zkWSP: "http://zk-wsp-server.zkcloud.svc.cluster.local:8989/request"
-  zkWSPRouter:
-    zkAxon:
-      identifier: /axon
-      endpoint: "http://zk-axon.zk-client.svc.cluster.local:80"
-    zkGPT:
-      identifier: /gpt
-      endpoint: "http://zk-gpt.zk-client.svc.cluster.local:80"
-redis:
-  host:  "redis-master.redis.svc.cluster.local"
-  port: 6379
-  readTimeout: 12
+
+#router:
+#  zkApiServer:  "http://zk-api-server.zkcloud.svc.cluster.local"
+#  zkDashboardUrl:  "https://dashboard"
+#  zkWSP: "http://zk-wsp-server.zkcloud.svc.cluster.local:8989/request"
+#  zkWSPRouter:
+#    zkAxon:
+#      identifier: /axon
+#      endpoint: "http://zk-axon.zk-client.svc.cluster.local:80"
+#    zkGPT:
+#      identifier: /gpt
+#      endpoint: "http://zk-gpt.zk-client.svc.cluster.local:80"
+
 suprsend:
   workspaceKey:  ""
   workspaceSecret:  ""
@@ -41,7 +37,7 @@ zkGpt:
   pinecone_index: ""
 
 image:
-  repo: "zk-auth"
+  repo: "zk-slack"
   pullPolicy: Always
   tag: "latest"
 
@@ -51,7 +47,7 @@ fullnameOverride: ""
 
 serviceAccount:
   # Specifies whether a service account should be created
-  create: true
+  create: false
   # Annotations to add to the service account
   annotations: {}
   # The name of the service account to use.
@@ -74,26 +70,6 @@ securityContext: {}
 service:
   type: ClusterIP
   port: 80
-
-ingress:
-  enabled: true
-  className: "nginx"
-  annotations:
-    cert-manager.io/cluster-issuer: letsencrypt-cluster-issuer
-  hosts:
-    - host: ""
-      paths:
-        - path: /
-          pathType: ImplementationSpecific
-    - host: ""
-      paths:
-        - path: /v1/
-          pathType: ImplementationSpecific
-  tls:
-    - secretName: ""
-      hosts:
-        - ""
-        - ""
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
@@ -119,3 +95,24 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+slack:
+  clientId: ""
+  clientSecret: ""
+  signingSecret: ""
+  appId: ""
+  scopes: >
+    app_mentions:read,
+    channels:history,
+    channels:join,
+    channels:read,
+    chat:write,
+    emoji:read,
+    groups:read,
+    im:read,
+    mpim:read,
+    im:history,
+    incoming-webhook,
+    users:read,
+    chat:write.public
+  redirectUri: "https://a13d-2406-7400-9a-86f1-dd05-8d0-1c72-e14b.ngrok-free.app/p/slack/oauth/redirect"

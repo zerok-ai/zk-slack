@@ -23,6 +23,7 @@ import reactor.core.publisher.Mono;
 import javax.transaction.Transactional;
 import java.io.IOException;
 import java.net.URI;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -82,6 +83,13 @@ public class SlackOAuthServiceImpl implements SlackOAuthService {
     public URI createSlackOAuthRedirectionUri(String userId, String org) {
 
         try {
+            //check for deduplication
+            Optional<SlackClientIntegration> optionalSlackClientIntegration = slackClientIntegrationRepository.findSlackClientIntegrationByOrg(org);
+            if(optionalSlackClientIntegration.isPresent()){
+                //TODO :: throw error
+                return null;
+            }
+
             String stateOAuthKey = UUID.randomUUID().toString();
 
             //TODO : store this state in DB and status as pending , UI should send userId, org Id in input map
@@ -90,6 +98,7 @@ public class SlackOAuthServiceImpl implements SlackOAuthService {
                     .org(org)
                     .stateOAuthKey(stateOAuthKey)
                     .build();
+
             slackClientOAuthStateRepository.save(slackClientOAuthState);
 
 
@@ -118,11 +127,9 @@ public class SlackOAuthServiceImpl implements SlackOAuthService {
                     })
                     .doOnError(error -> {
                         System.err.println("Error while fetching client access token: " + error.getMessage());
+                        //TODO :: throw error
                     })
                     .block();
-
-            System.out.println("final access token : " + clientAccessToken);
-
             //store access token in slack client integration
             //fetch user and org from stateOAuthTable
             SlackClientOAuthState slackClientOAuthState = slackClientOAuthStateRepository.findSlackClientOAuthStatesByStateOAuthKey(state);
@@ -137,7 +144,7 @@ public class SlackOAuthServiceImpl implements SlackOAuthService {
 
             SlackClientIntegration slackClientIntegration = SlackClientIntegration.builder()
                     .clientAccessToken(encodedAccessToken)
-//                .slackChannel()
+//                  .slackChannel()
                     .status(SlackIntegrationStatus.INSTALLED)
                     .org(slackClientOAuthState.getOrg())
                     .createdBy(slackClientOAuthState.getCreatedBy())

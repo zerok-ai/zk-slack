@@ -3,6 +3,7 @@ package com.zerok.slackintegration;
 import com.slack.api.bolt.App;
 import com.slack.api.bolt.AppConfig;
 import com.zerok.slackintegration.config.SlackConfigProperties;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

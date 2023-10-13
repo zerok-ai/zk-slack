@@ -3,14 +3,16 @@ kind: Deployment
 metadata:
   name: {{ include "zk-slack.fullname" . }}
   labels:
-    {{- include "zk-slack.labels" . | nindent 4 }}
+    app: zk-slack
+  {{- include "zk-slack.labels" . | nindent 4 }}
 spec:
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
   selector:
     matchLabels:
-      {{- include "zk-auth.selectorLabels" . | nindent 6 }}
+      app: zk-slack
+    {{- include "zk-slack.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -18,7 +20,8 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "zk-auth.selectorLabels" . | nindent 8 }}
+        app: zk-slack
+      {{- include "zk-slack.selectorLabels" . | nindent 8 }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
@@ -33,59 +36,32 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.global.dockerBase }}/{{ .Values.image.repo }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          envFrom:
-            - secretRef:
-                name: pl-db-secrets
           ports:
             - name: http
-              containerPort: 80
+              containerPort: 3000
               protocol: TCP
           livenessProbe:
             httpGet:
-              path: /healthz
+              path: /actuator/health
               port: http
+            initialDelaySeconds: 60 # Wait for the application to start
+            periodSeconds: 10
           readinessProbe:
             httpGet:
-              path: /healthz
+              path: /actuator/health # Adjust the path based on your application
               port: http
+            initialDelaySeconds: 15 # Wait for the application to start
+            periodSeconds: 10 # Check the readiness every 10 seconds
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
-          - mountPath: /opt/zk-auth-pixie-configmap.yaml
-            name: zk-auth-pixie-configmap
-            subPath: zk-auth-pixie-configmap.yaml
-          - mountPath: /opt/zk-auth-configmap.yaml
-            name: zk-auth-configmap
-            subPath: zk-auth-configmap.yaml
-          env:
-            - name: OPENAI_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: zk-cluster-configurations-secret
-                  key: openAI_key
-            - name: PINECONE_ENV
-              valueFrom:
-                secretKeyRef:
-                  name: zk-cluster-configurations-secret
-                  key: pinecone_env
-            - name: PINECONE_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: zk-cluster-configurations-secret
-                  key: pinecone_key
-            - name: PINECONE_INDEX
-              valueFrom:
-                secretKeyRef:
-                  name: zk-cluster-configurations-secret
-                  key: pinecone_index
+          - mountPath: /opt/zk-slack-configmap.yaml
+            name: zk-slack-configmap
+            subPath: zk-slack-configmap.yaml
       volumes:
       - configMap:
-          name: zk-auth-pixie-configmap
-        name: zk-auth-pixie-configmap
-      - configMap:
-          name: zk-auth-configmap
-        name: zk-auth-configmap
-        
+          name: zk-slack-configmap
+        name: zk-slack-configmap
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

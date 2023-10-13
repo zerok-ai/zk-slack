@@ -8,9 +8,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
 
-
 @RestController
-@RequestMapping("/slack/events")
+@RequestMapping("/p/slack/events")
 public class SlackAppController {
 
     //ALL slack events that happened on slack will come via this channel

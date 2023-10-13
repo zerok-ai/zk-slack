@@ -1,59 +1,33 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: zk-auth-configmap
+  name: zk-slack-configmap
 
 data: 
   zk-auth-configmap.yaml: |-
-
-
-    database:
-      host: localhost
-      port: 5432
-
     server:
-      host: localhost
-      port: 80
+      port: 3000
+    spring:
+      datasource:
+        driver-class-name: org.postgresql.Driver
+        password: "{{ .Values.postgres.password }}"
+        #    url: jdbc:postgresql://postgres.plc.svc.cluster.local:5432/pl
+        url: "jdbc:postgresql://{{ .Values.postgres.host }}:{{ .Values.postgres.port }}/pl"
+        username: "{{ .Values.postgres.user }}"
+      jpa:
+        hibernate:
+          ddl-auto: update
+      entity-scan:
+        base-package: com.zerok.slackintegration.entities
 
-    logs:
-      color: true
-      level: DEBUG
+    logging.level:
+      com.slack.api: DEBUG
 
-    auth:
-      expiry: 1800
-      adminEmail: master+ORG_NAME@zerok.ai
+    slack:
+      scopes: "{{ .Values.slack.scopes }}"
+      clientId: "{{ .Values.slack.clientId }}"    #"2752528759122.5974500920640"
+      clientSecret: "{{ .Values.slack.clientSecret }}" #"5a73604214192016035cf5871e1932a9"
+      redirectUri: "{{ .Values.slack.redirectUri }}"
+      signingSecret: "{{ .Values.slack.signingSecret }}" #"09b15216bb3371d41f72b4d4415b132f"
+      appId: "{{ .Values.slack.appId }}"  #"A05UNEQT2JU"
 
-    http:
-      debug: true
-
-    pixie:
-      local: false
-      config: /opt/zk-auth-pixie-configmap.yaml
-
-    router:
-      zkApiServer: "{{ .Values.router.zkApiServer }}"
-      zkDashboard: "{{ .Values.router.zkDashboardUrl }}.{{ .Values.global.zkcloud.host }}"
-      zkWSP: "{{ .Values.router.zkWSP }}"
-      zkWSPRouter:
-        zkAxon:
-          identifier: /axon
-          endpoint: "{{ .Values.router.zkWSPRouter.zkAxon.endpoint }}"
-        zkGPT:
-          identifier: /gpt
-          endpoint: "{{ .Values.router.zkWSPRouter.zkGPT.endpoint }}"
-
-    redis:
-      host: "{{ .Values.redis.host }}"
-      port: {{ .Values.redis.port }}
-      readTimeout: 20
-
-    suprsend:
-      workspaceKey: "{{ .Values.suprsend.workspaceKey }}"
-      workspaceSecret: "{{ .Values.suprsend.workspaceSecret }}"
-
-    postgres:
-      host: "{{ .Values.postgres.host }}"
-      port: {{ .Values.postgres.port }}
-      user: "{{ .Values.postgres.user }}"
-      password: "{{ .Values.postgres.password }}"
-      dbname: "{{ .Values.postgres.database }}"

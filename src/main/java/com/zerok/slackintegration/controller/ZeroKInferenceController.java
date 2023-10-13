@@ -15,7 +15,7 @@ import java.io.IOException;
 import java.util.List;
 
 @RestController
-@RequestMapping("/slack/publish")
+@RequestMapping("/i/slack/publish")
 public class ZeroKInferenceController {
 
     private final ZeroKSlackIntegrationService slackIntegrationService;

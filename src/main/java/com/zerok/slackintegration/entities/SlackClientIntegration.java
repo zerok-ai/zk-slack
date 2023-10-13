@@ -9,6 +9,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.sql.Date;
+import java.sql.Time;
+import java.sql.Timestamp;
 
 import javax.persistence.*;
 
@@ -21,7 +23,7 @@ public class SlackClientIntegration {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private long id;
 
     @Column(name = "org",unique = true)
     private String org;
@@ -47,9 +49,9 @@ public class SlackClientIntegration {
 
     @CreationTimestamp
     @Column(name = "created_on")
-    private Date createdOn;
+    private Timestamp createdOn;
 
     @UpdateTimestamp
     @Column(name = "updated_on")
-    private Date updatedOn;
+    private Timestamp updatedOn;
 }

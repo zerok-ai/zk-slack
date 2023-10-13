@@ -4,9 +4,9 @@ import lombok.Getter;
 
 @Getter
 public enum SlackIntegrationStatus {
-    INSTALLED("Installed"),
+    INSTALLED("Connected to Slack"),
     DISABLED("Disabled"),
-    INSTALLATION_PENDING("Installation Pending");
+    INSTALLATION_PENDING("Connect to Slack");
 
     private final String displayName;
 
