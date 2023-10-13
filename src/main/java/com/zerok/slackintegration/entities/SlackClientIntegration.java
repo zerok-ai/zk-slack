@@ -1,6 +1,7 @@
 package com.zerok.slackintegration.entities;
 
 import com.zerok.slackintegration.model.enums.SlackIntegrationStatus;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -8,11 +9,9 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import java.sql.Date;
-import java.sql.Time;
 import java.sql.Timestamp;
 
-import javax.persistence.*;
+
 
 @Entity(name = "slack_client_integration")
 @Data

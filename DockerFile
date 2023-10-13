@@ -1,5 +1,5 @@
 # Use OpenJDK 8 as the base image
-FROM openjdk:8-jre-alpine
+FROM openjdk:17-oracle
 
 # Set the working directory in the container
 WORKDIR /deploy

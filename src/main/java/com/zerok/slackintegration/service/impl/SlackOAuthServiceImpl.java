@@ -17,10 +17,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 import reactor.core.publisher.Mono;
 
-import javax.transaction.Transactional;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Optional;
@@ -78,7 +78,7 @@ public class SlackOAuthServiceImpl implements SlackOAuthService {
         }
     }
 
-    @Transactional
+
     @Override
     public URI createSlackOAuthRedirectionUri(String userId, String org) {
 

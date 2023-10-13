@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zk-slack
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zk-slack
+  template:
+    metadata:
+      labels:
+        app: zk-slack
+    spec:
+      containers:
+        - name: zk-slack
+          image: us-west1-docker.pkg.dev/zerok-dev/zk-client/zk-gpt:dev
+          imagePullPolicy: Always
+          volumeMounts:
+            - name: zk-gpt-config-volume
+              mountPath: /app/config
+          ports:
+            - containerPort: 80
+          resources:
+            limits:
+              memory: "1024Mi"
+              cpu: "500m"
+      volumes:
+        - name: zk-gpt-config-volume
+          configMap:
+            name: zk-gpt
