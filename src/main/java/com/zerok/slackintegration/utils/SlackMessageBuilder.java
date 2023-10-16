@@ -34,9 +34,6 @@ public class SlackMessageBuilder {
                         .text(String.format("*Issue Id:*\n %s", zeroKInferencePublishRequest.getIssueId()))
                 .build());
         section2FeildObjectList.add(MarkdownTextObject.builder()
-                .text(String.format("*Issue Occurred TimeStamp:*\n %s", zeroKInferencePublishRequest.getIssueTimestamp()))
-                .build());
-        section2FeildObjectList.add(MarkdownTextObject.builder()
                 .text(String.format("*Incident Id:*\n %s)", zeroKInferencePublishRequest.getIncidentId()))
                 .build());
         section2FeildObjectList.add(MarkdownTextObject.builder()

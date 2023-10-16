@@ -3,8 +3,10 @@ package com.zerok.slackintegration.service.impl;
 import com.slack.api.bolt.App;
 import com.slack.api.methods.SlackApiException;
 import com.slack.api.methods.request.apps.AppsUninstallRequest;
+import com.slack.api.methods.request.auth.AuthTestRequest;
 import com.slack.api.methods.request.conversations.ConversationsListRequest;
 import com.slack.api.methods.response.apps.AppsUninstallResponse;
+import com.slack.api.methods.response.auth.AuthTestResponse;
 import com.slack.api.methods.response.conversations.ConversationsListResponse;
 import com.slack.api.model.Conversation;
 import com.zerok.slackintegration.config.SlackConfigProperties;
@@ -70,6 +72,15 @@ public class SlackAppServiceImpl implements SlackAppService {
             throw new SlackUnInstallException("Error while uninstalling slack from workspace for client",500,appsUninstallResponse.getError());
         }
 
+    }
+
+    @Override
+    public AuthTestResponse fetchSlackWorkspaceAccessToken(String accessToken) throws SlackApiException, IOException {
+
+        AuthTestRequest authTestRequest = AuthTestRequest.builder()
+                .token(accessToken)
+                .build();
+        return slackApp.client().authTest(authTestRequest);
     }
 
 

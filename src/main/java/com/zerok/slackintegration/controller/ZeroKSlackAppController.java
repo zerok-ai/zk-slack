@@ -33,6 +33,13 @@ public class ZeroKSlackAppController {
         return ResponseEntity.status(HttpStatus.FOUND).location(slackOAuthRedirectionUri).build();
     }
 
+    @GetMapping(value = "/initiate")
+    public ResponseEntity<Void> testredirect(@RequestParam(name = "userId") String userId, @RequestParam(name = "orgId") String org) {
+        URI slackOAuthRedirectionUri = slackOAuthService.createSlackOAuthRedirectionUri(userId,org);
+        System.out.println("redirection URL : "+ slackOAuthRedirectionUri.toString());
+        return ResponseEntity.status(HttpStatus.FOUND).location(slackOAuthRedirectionUri).build();
+    }
+
     // get slack integration for user id and org id
     @GetMapping("/fetch")
     @ResponseBody

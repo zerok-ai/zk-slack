@@ -42,6 +42,12 @@ public class SlackClientIntegration {
     @Column(name = "slack_channel")
     private String slackChannel;
 
+    @Column(name = "slack_user_id")
+    private String slackUserId;
+
+    @Column(name = "slack_team_id")
+    private String slackTeamId;
+
     @Column(name = "token_type")
     private String tokenType;
 

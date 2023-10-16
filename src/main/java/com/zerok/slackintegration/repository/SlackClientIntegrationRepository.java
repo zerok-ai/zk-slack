@@ -10,4 +10,6 @@ import java.util.Optional;
 @Repository
 public interface SlackClientIntegrationRepository extends JpaRepository<SlackClientIntegration, Long> {
     Optional<SlackClientIntegration> findSlackClientIntegrationByOrgAndStatus(String org, SlackIntegrationStatus status);
+
+    Optional<SlackClientIntegration> findSlackClientIntegrationByOrg(String org);
 }

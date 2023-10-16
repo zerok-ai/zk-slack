@@ -1,6 +1,7 @@
 package com.zerok.slackintegration.service.impl;
 
 import com.slack.api.methods.SlackApiException;
+import com.slack.api.methods.response.auth.AuthTestResponse;
 import com.zerok.slackintegration.client.SlackClient;
 import com.zerok.slackintegration.config.SlackConfigProperties;
 import com.zerok.slackintegration.entities.SlackClientIntegration;
@@ -10,6 +11,7 @@ import com.zerok.slackintegration.exception.SlackIntegrationInitiateException;
 import com.zerok.slackintegration.model.enums.SlackIntegrationStatus;
 import com.zerok.slackintegration.repository.SlackClientIntegrationRepository;
 import com.zerok.slackintegration.repository.SlackClientOAuthStateRepository;
+import com.zerok.slackintegration.service.SlackAppService;
 import com.zerok.slackintegration.service.SlackOAuthService;
 import com.zerok.slackintegration.utils.Utils;
 import io.netty.util.internal.StringUtil;
@@ -36,14 +38,17 @@ public class SlackOAuthServiceImpl implements SlackOAuthService {
 
     private final SlackClientIntegrationRepository slackClientIntegrationRepository;
 
+    private final SlackAppService slackAppService;
+
     private final ZeroKSlackIntegrationServiceImpl zeroKSlackIntegrationService;
 
     @Autowired
-    public SlackOAuthServiceImpl(SlackConfigProperties slackConfigProperties, SlackClient slackClient, SlackClientOAuthStateRepository slackClientOAuthStateRepository, SlackClientIntegrationRepository slackClientIntegrationRepository, ZeroKSlackIntegrationServiceImpl zeroKSlackIntegrationService) {
+    public SlackOAuthServiceImpl(SlackConfigProperties slackConfigProperties, SlackClient slackClient, SlackClientOAuthStateRepository slackClientOAuthStateRepository, SlackClientIntegrationRepository slackClientIntegrationRepository, SlackAppService slackAppService, ZeroKSlackIntegrationServiceImpl zeroKSlackIntegrationService) {
         this.slackConfigProperties = slackConfigProperties;
         this.slackClient = slackClient;
         this.slackClientOAuthStateRepository = slackClientOAuthStateRepository;
         this.slackClientIntegrationRepository = slackClientIntegrationRepository;
+        this.slackAppService = slackAppService;
         this.zeroKSlackIntegrationService = zeroKSlackIntegrationService;
     }
 
@@ -137,17 +142,26 @@ public class SlackOAuthServiceImpl implements SlackOAuthService {
             validateSlackClientOAuthState(slackClientOAuthState);
 
             if (StringUtil.isNullOrEmpty(clientAccessToken)) {
-                throw new SlackIntegrationInitiateException("", HttpStatus.INTERNAL_SERVER_ERROR.value(), "Error while creating the slack redirection URL");
+                throw new SlackIntegrationInitiateException("", HttpStatus.INTERNAL_SERVER_ERROR.value(), "Error while creating the slack client access tokenL");
             }
+
+            AuthTestResponse authTestResponse = slackAppService.fetchSlackWorkspaceAccessToken(clientAccessToken);
+
+            if(!authTestResponse.isOk()){
+                throw new SlackIntegrationInitiateException("", HttpStatus.INTERNAL_SERVER_ERROR.value(), "Invalid access token generated");
+            }
+
             String encodedAccessToken = Utils.encodeToBase64(clientAccessToken);
 
             SlackClientIntegration slackClientIntegration = SlackClientIntegration.builder()
                     .clientAccessToken(encodedAccessToken)
-//                  .slackChannel()
                     .status(SlackIntegrationStatus.INSTALLED)
                     .org(slackClientOAuthState.getOrg())
                     .createdBy(slackClientOAuthState.getCreatedBy())
                     .tokenType("bearer")
+                    .slackUserId(authTestResponse.getUserId())
+                    .slackTeamId(authTestResponse.getTeamId())
+                    .slackWorkspace(authTestResponse.getTeam())
                     .updatedBy(slackClientOAuthState.getCreatedBy())
                     .build();
 

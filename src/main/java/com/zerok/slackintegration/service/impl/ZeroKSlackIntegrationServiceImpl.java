@@ -142,12 +142,6 @@ public class ZeroKSlackIntegrationServiceImpl implements ZeroKSlackIntegrationSe
             return SlackIntegrationFetchResponse.builder()
                     .orgId(orgId)
                     .status(SlackIntegrationStatus.PENDING)
-                    .addToSlack(ZkSlackButton.builder()
-                            .actionUrl("/v1/u/slack/integration/initiate")
-                            .label(SlackIntegrationStatus.PENDING.getDisplayName())
-                            .disable(false)
-                            .httpMethod(HttpMethod.POST)
-                            .build())
                     .userId(userId)
                     .build();
 
@@ -156,10 +150,7 @@ public class ZeroKSlackIntegrationServiceImpl implements ZeroKSlackIntegrationSe
             return SlackIntegrationFetchResponse.builder()
                     .orgId(orgId)
                     .status(slackClientIntegration.getStatus())
-                    .addToSlack(ZkSlackButton.builder()
-                            .label(slackClientIntegration.getStatus().getDisplayName())
-                            .disable(true)
-                            .build())
+                    .slackWorkspace(slackClientIntegration.getSlackWorkspace())
                     .userId(userId)
                     .build();
         }
@@ -181,12 +172,11 @@ public class ZeroKSlackIntegrationServiceImpl implements ZeroKSlackIntegrationSe
             Timestamp currentTimestamp = new Timestamp(currentTimeMillis);
             slackClientIntegration.setUpdatedOn(currentTimestamp);
             slackClientIntegration.setUpdatedBy(userId);
-            slackClientIntegrationRepository.save(slackClientIntegration);
-            //un install slack app
-//        uninstall slack app from a workspace
+            //uninstall slack app from a workspace
             slackAppService.uninstallSlackAppFromWorkSpace(slackClientIntegration);
+            slackClientIntegrationRepository.delete(slackClientIntegration);
+            log.debug(String.format("Deleting slack integration for org: %s by userId: %s",orgId, userId));
         }
-
     }
 
 

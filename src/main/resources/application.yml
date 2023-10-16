@@ -33,7 +33,7 @@ slack:
     chat:write.public
   clientId: "2752528759122.5974500920640"
   clientSecret: "5a73604214192016035cf5871e1932a9"
-  redirectUri: "https://a13d-2406-7400-9a-86f1-dd05-8d0-1c72-e14b.ngrok-free.app/p/slack/oauth/redirect"
+  redirectUri: "https://e594-106-51-88-125.ngrok-free.app/v1/p/slack/oauth/redirect"
   signingSecret: "09b15216bb3371d41f72b4d4415b132f"
   appId: "A05UNEQT2JU"
 

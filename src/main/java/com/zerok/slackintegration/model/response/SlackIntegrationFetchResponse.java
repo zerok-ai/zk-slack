@@ -18,13 +18,7 @@ public class SlackIntegrationFetchResponse {
     private String orgId;
     private String userId;
     private SlackIntegrationStatus status; // Installed, DISABLED, Installation pending
-//    in case of installed
-    private ZkSlackButton view;
-    private ZkSlackButton disconnect;
-//    in case of installation pending
-    private ZkSlackButton addToSlack;
-//    in case of disabled installation
-    private ZkSlackButton reInstall;
+    private String slackWorkspace;
     private LocalDateTime createdOn;
     private LocalDateTime updatedOn;
 }
