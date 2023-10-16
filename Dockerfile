@@ -5,7 +5,6 @@ FROM openjdk:17-oracle
 WORKDIR /deploy
 
 RUN mkdir -p /deploy/cmd/zk-slack
-WORKDIR /deploy
 
 COPY build/libs/zk-slack-0.0.1-SNAPSHOT.jar /deploy/zk-slack.jar
 

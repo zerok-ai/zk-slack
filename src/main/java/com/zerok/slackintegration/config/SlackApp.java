@@ -1,4 +1,4 @@
-package com.zerok.slackintegration;
+package com.zerok.slackintegration.config;
 
 import com.slack.api.bolt.App;
 import com.slack.api.bolt.AppConfig;
