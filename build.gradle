@@ -11,7 +11,7 @@ java {
 }
 
 
-group = 'com.zerok'
+group = 'com.zerok.slackintegration'
 version = '0.0.1-SNAPSHOT'
 
 repositories {
@@ -54,20 +54,9 @@ sourceSets {
 	}
 }
 
-//tasks.register('customFatJar', Jar) {
-//	manifest {
-//		attributes 'Main-Class': 'com.zerok.slackintegration.SlackMessageBuilder'
-//	}
-//	archiveBaseName.set('all-in-one-jar')  // Set the archive base name = 'all-in-one-jar'
-//	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-//	from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
-//	with jar
-//}
-
-bootJar {
+jar {
 	manifest {
 		attributes(
-				'Class-Path' : 'zk-slack/main',
 				'Main-Class': 'com.zerok.slackintegration.ZkSlackApplication'
 		)
 	}
