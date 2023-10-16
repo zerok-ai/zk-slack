@@ -31,3 +31,5 @@ data:
       signingSecret: "{{ .Values.slack.signingSecret }}" #"09b15216bb3371d41f72b4d4415b132f"
       appId: "{{ .Values.slack.appId }}"  #"A05UNEQT2JU"
 
+    zeroKDashboard:
+      host: {{ .Values.zeroKDashboard.host }}

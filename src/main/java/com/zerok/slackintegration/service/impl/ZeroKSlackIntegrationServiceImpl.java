@@ -4,9 +4,10 @@ import com.slack.api.bolt.App;
 import com.slack.api.methods.SlackApiException;
 import com.slack.api.methods.request.chat.ChatPostMessageRequest;
 import com.slack.api.methods.response.chat.ChatPostMessageResponse;
+import com.zerok.slackintegration.config.SlackConfigProperties;
 import com.zerok.slackintegration.entities.SlackClientIntegration;
 import com.zerok.slackintegration.entities.VizierCluster;
-import com.zerok.slackintegration.model.ZeroKIssueInference;
+import com.zerok.slackintegration.model.request.ZeroKInferencePublishRequest;
 import com.zerok.slackintegration.model.ZkSlackButton;
 import com.zerok.slackintegration.model.enums.SlackIntegrationStatus;
 import com.zerok.slackintegration.model.response.SlackIntegrationFetchResponse;
@@ -17,6 +18,7 @@ import com.zerok.slackintegration.service.SlackAppService;
 import com.zerok.slackintegration.service.ZeroKSlackIntegrationService;
 import com.zerok.slackintegration.utils.SlackMessageBuilder;
 import com.zerok.slackintegration.utils.Utils;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,32 +47,35 @@ public class ZeroKSlackIntegrationServiceImpl implements ZeroKSlackIntegrationSe
 
     private final VizierClusterRepository vizierClusterRepository;
 
+    private final SlackConfigProperties slackConfigProperties;
+
     @Autowired
-    public ZeroKSlackIntegrationServiceImpl(App slackApp, SlackAppService slackAppService, SlackClientIntegrationRepository slackClientIntegrationRepository, VizierClusterRepository vizierClusterRepository) {
+    public ZeroKSlackIntegrationServiceImpl(App slackApp, SlackAppService slackAppService, SlackClientIntegrationRepository slackClientIntegrationRepository, VizierClusterRepository vizierClusterRepository, SlackConfigProperties slackConfigProperties) {
         this.slackApp = slackApp;
         this.slackAppService = slackAppService;
         this.slackClientIntegrationRepository = slackClientIntegrationRepository;
         this.vizierClusterRepository = vizierClusterRepository;
+        this.slackConfigProperties = slackConfigProperties;
     }
 
     @Override
-    public List<String> publishInferenceToSlack(ZeroKIssueInference zeroKIssueInference) throws SlackApiException, IOException {
+    public List<String> publishInferenceToSlack(ZeroKInferencePublishRequest zeroKInferencePublishRequest) throws SlackApiException, IOException {
         //write logic here for publishing the inference
         // exception handling
         try {
             //fetch bot token specific to clientId
 
             //TODO : uncomment after testing
-////            //fetch org info from cluster id
-////            Optional<VizierCluster> optionalVizierCluster = vizierClusterRepository.findVizierClusterById(UUID.fromString(zeroKIssueInference.getClusterId()));
-////
-////            if (!optionalVizierCluster.isPresent()) {
-////                log.debug("org id is not present for the given cluster id : {} ", zeroKIssueInference.getClusterId());
-////                return null;
-////            }
-//
-//            String orgId = optionalVizierCluster.get().getOrgId().toString();
-            String orgId = "zerok";
+            //fetch org info from cluster id
+            Optional<VizierCluster> optionalVizierCluster = vizierClusterRepository.findVizierClusterById(UUID.fromString(zeroKInferencePublishRequest.getClusterId()));
+
+            if (optionalVizierCluster.isEmpty()) {
+                log.debug("org id is not present for the given cluster id : {} ", zeroKInferencePublishRequest.getClusterId());
+                return null;
+            }
+
+            String orgId = optionalVizierCluster.get().getOrgId().toString();
+            //String orgId = "zerok";
             //fetch client token
             Optional<SlackClientIntegration> optionalSlackClientIntegration = slackClientIntegrationRepository.findSlackClientIntegrationByOrg(orgId);
 
@@ -81,8 +86,9 @@ public class ZeroKSlackIntegrationServiceImpl implements ZeroKSlackIntegrationSe
 
             SlackClientIntegration slackClientIntegration = optionalSlackClientIntegration.get();
             //format the text in a good way
-            String text = zeroKIssueInference.getInference();
-            SlackMessage slackMessage = SlackMessageBuilder.generateSlackIntegrationMessage(zeroKIssueInference);
+            String text = zeroKInferencePublishRequest.getInference();
+            String zeroKDashboardUrl = Utils.generateDashboardIssueUrl(slackConfigProperties.getZeroKDashboardUrl(), zeroKInferencePublishRequest);
+            SlackMessage slackMessage = SlackMessageBuilder.generateSlackIntegrationMessage(zeroKInferencePublishRequest, zeroKDashboardUrl);
             String slackAccessToken = Utils.decodeFromBase64(slackClientIntegration.getClientAccessToken());
             //fetch client channels
             List<String> slackChannelList = slackAppService.getSlackChannelsWhereAppInstalled(slackClientIntegration);
@@ -132,46 +138,43 @@ public class ZeroKSlackIntegrationServiceImpl implements ZeroKSlackIntegrationSe
         //fetch from DB along with status
         Optional<SlackClientIntegration> optionalSlackClientIntegration = slackClientIntegrationRepository.findSlackClientIntegrationByOrg(orgId);
 
-        if (!optionalSlackClientIntegration.isPresent()) {
+        if (optionalSlackClientIntegration.isEmpty()) {
             return SlackIntegrationFetchResponse.builder()
                     .orgId(orgId)
-                    .status(SlackIntegrationStatus.INSTALLATION_PENDING)
+                    .status(SlackIntegrationStatus.PENDING)
                     .addToSlack(ZkSlackButton.builder()
-                            .actionUrl("/u/slack/integration/initiate")
-                            .label(SlackIntegrationStatus.INSTALLATION_PENDING.getDisplayName())
+                            .actionUrl("/v1/u/slack/integration/initiate")
+                            .label(SlackIntegrationStatus.PENDING.getDisplayName())
                             .disable(false)
                             .httpMethod(HttpMethod.POST)
                             .build())
                     .userId(userId)
                     .build();
 
-        }
-        else{
+        } else {
             SlackClientIntegration slackClientIntegration = optionalSlackClientIntegration.get();
             return SlackIntegrationFetchResponse.builder()
                     .orgId(orgId)
                     .status(slackClientIntegration.getStatus())
                     .addToSlack(ZkSlackButton.builder()
-//                            .actionUrl("/u/slack/integration/initiate")
                             .label(slackClientIntegration.getStatus().getDisplayName())
                             .disable(true)
-//                            .httpMethod(HttpMethod.POST)
                             .build())
                     .userId(userId)
                     .build();
         }
     }
 
+    @Transactional
     @Override
-    public void disableSlackIntegration(String userId, String orgId) {
+    public void disableSlackIntegration(String userId, String orgId) throws SlackApiException, IOException {
 
         Optional<SlackClientIntegration> optionalSlackClientIntegration = slackClientIntegrationRepository.findSlackClientIntegrationByOrg(orgId);
 
-        if (!optionalSlackClientIntegration.isPresent()) {
+        if (optionalSlackClientIntegration.isEmpty()) {
             //TODO :: throw error
             log.debug("slack integration disable request for org whose integration is not present");
-        }
-        else{
+        } else {
             SlackClientIntegration slackClientIntegration = optionalSlackClientIntegration.get();
             slackClientIntegration.setStatus(SlackIntegrationStatus.DISABLED);
             long currentTimeMillis = System.currentTimeMillis();
@@ -179,7 +182,11 @@ public class ZeroKSlackIntegrationServiceImpl implements ZeroKSlackIntegrationSe
             slackClientIntegration.setUpdatedOn(currentTimestamp);
             slackClientIntegration.setUpdatedBy(userId);
             slackClientIntegrationRepository.save(slackClientIntegration);
+            //un install slack app
+//        uninstall slack app from a workspace
+            slackAppService.uninstallSlackAppFromWorkSpace(slackClientIntegration);
         }
+
     }
 
 

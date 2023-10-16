@@ -36,6 +36,9 @@ public class SlackClientIntegration {
     @Column(name = "client_access_token")
     private String clientAccessToken;
 
+    @Column(name = "slack_workspace")
+    private String slackWorkspace;
+
     @Column(name = "slack_channel")
     private String slackChannel;
 

@@ -30,5 +30,7 @@ public class SlackConfigProperties {
     @Value("${slack.signingSecret}")
     private String signingSecret;
 
+    @Value("${zeroKDashboard.host}")
+    private String zeroKDashboardUrl;
 
 }

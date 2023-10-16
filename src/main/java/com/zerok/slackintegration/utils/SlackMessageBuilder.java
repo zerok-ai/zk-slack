@@ -5,14 +5,14 @@ import com.slack.api.model.block.composition.MarkdownTextObject;
 import com.slack.api.model.block.composition.PlainTextObject;
 import com.slack.api.model.block.composition.TextObject;
 import com.slack.api.model.block.element.ButtonElement;
-import com.zerok.slackintegration.model.ZeroKIssueInference;
+import com.zerok.slackintegration.model.request.ZeroKInferencePublishRequest;
 import com.zerok.slackintegration.model.slack.SlackMessage;
 
 import java.util.*;
 
 public class SlackMessageBuilder {
 
-    public static SlackMessage createSlackInferenceMessage(ZeroKIssueInference zeroKIssueInference) {
+    public static SlackMessage createSlackInferenceMessage(ZeroKInferencePublishRequest zeroKInferencePublishRequest) {
         SlackMessage slackMessage = new SlackMessage();
 
         List<LayoutBlock> blocks = new ArrayList<>();
@@ -31,16 +31,16 @@ public class SlackMessageBuilder {
         // Section 2
         List<TextObject> section2FeildObjectList = new ArrayList<>();
         section2FeildObjectList.add(MarkdownTextObject.builder()
-                        .text(String.format("*Issue Id:*\n %s",zeroKIssueInference.getIssueId()))
+                        .text(String.format("*Issue Id:*\n %s", zeroKInferencePublishRequest.getIssueId()))
                 .build());
         section2FeildObjectList.add(MarkdownTextObject.builder()
-                .text(String.format("*Issue Occurred TimeStamp:*\n %s",zeroKIssueInference.getIssueTimestamp()))
+                .text(String.format("*Issue Occurred TimeStamp:*\n %s", zeroKInferencePublishRequest.getIssueTimestamp()))
                 .build());
         section2FeildObjectList.add(MarkdownTextObject.builder()
-                .text(String.format("*Incident Id:*\n %s)",zeroKIssueInference.getIncidentId()))
+                .text(String.format("*Incident Id:*\n %s)", zeroKInferencePublishRequest.getIncidentId()))
                 .build());
         section2FeildObjectList.add(MarkdownTextObject.builder()
-                .text(String.format("*Inference:*\n %s",zeroKIssueInference.getInference()))
+                .text(String.format("*Inference:*\n %s", zeroKInferencePublishRequest.getInference()))
                 .build());
 
         SectionBlock section2 = SectionBlock.builder()
@@ -48,64 +48,12 @@ public class SlackMessageBuilder {
                 .build();
         blocks.add(section2);
 
-        // Section 3
-//        List<BlockElement> elements = new ArrayList<>();
-//        elements.add(RichTextSectionElement.builder()
-//                        .elements(Collections.singletonList(RichTextSectionElement.Text.builder()
-//                                .text("Zerok Observations : \n")
-//                                .style(RichTextSectionElement.TextStyle.builder()
-//                                        .bold(true)
-//                                        .build())
-//                                .build()))
-//                .build());
-//        elements.add(RichTextListElement.builder()
-//                .build());
-//        RichTextBlock section3 = RichTextBlock.builder()
-//                .elements(elements)
-//                .build();
-//
-//        blocks.add(section3);
-
-//        elements.add(new RichTextSection());
-//        elements.add(new RichTextList(List.of(
-//                new RichTextSection("item 1: "),
-//                new RichTextEmoji("basketball")
-//        )));
-//        elements.add(new RichTextList(List.of(
-//                new RichTextSection("item 2: "),
-//                new RichTextText("this is a list item")
-//        )));
-//        elements.add(new RichTextList(List.of(
-//                new RichTextSection("item 3: "),
-//                new RichTextLink("with a link", "https://slack.com/", true)
-//        )));
-//        elements.add(new RichTextList(List.of(
-//                new RichTextSection("item 4: "),
-//                new RichTextText("we are near the end")
-//        )));
-//        elements.add(new RichTextList(List.of(
-//                new RichTextSection("item 5: "),
-//                new RichTextText("this is the end")
-//        )));
-
-//        RichTextElementList richTextElementList = new RichTextElementList("rich_text_list", "bullet", elements);
-//        elements = new ArrayList<>();
-//        elements.add(richTextElementList);
-//        RichTextSection richTextSection = new RichTextSection("Zerok Observations : \n", true);
-//        richTextSection.setElements(elements);
-//        elements = new ArrayList<>();
-//        elements.add(richTextSection);
-//
-//        RichText richText = new RichText("rich_text", elements);
-//        section3.setElements(List.of(richText));
-//        blocks.add(section3);
-
         slackMessage.setBlocks(blocks);
 
         return slackMessage;
     }
 
-    public static SlackMessage generateSlackIntegrationMessage(ZeroKIssueInference zeroKIssueInference){
+    public static SlackMessage generateSlackIntegrationMessage(ZeroKInferencePublishRequest zeroKInferencePublishRequest, String zeroKInferenceUrl){
         SlackMessage slackMessage = new SlackMessage();
 
         List<LayoutBlock> blocks = new ArrayList<>();
@@ -153,7 +101,7 @@ public class SlackMessageBuilder {
         // Inference
         SectionBlock inferenceBlock = new SectionBlock();
         MarkdownTextObject zeroKInference = MarkdownTextObject.builder()
-                .text(zeroKIssueInference.getInference())
+                .text(zeroKInferencePublishRequest.getInference())
                 .build();
         inferenceBlock.setText(zeroKInference);
         blocks.add(inferenceBlock);

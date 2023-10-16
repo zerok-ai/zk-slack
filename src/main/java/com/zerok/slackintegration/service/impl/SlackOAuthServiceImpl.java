@@ -84,10 +84,9 @@ public class SlackOAuthServiceImpl implements SlackOAuthService {
 
         try {
             //check for deduplication
-            Optional<SlackClientIntegration> optionalSlackClientIntegration = slackClientIntegrationRepository.findSlackClientIntegrationByOrg(org);
-            if(optionalSlackClientIntegration.isPresent()){
-                //TODO :: throw error
-                return null;
+            Optional<SlackClientIntegration> optionalSlackClientIntegration = slackClientIntegrationRepository.findSlackClientIntegrationByOrgAndStatus(org, SlackIntegrationStatus.INSTALLED);
+            if (optionalSlackClientIntegration.isPresent()) {
+                throw new SlackIntegrationInitiateException("Active slack integration already exists for client", HttpStatus.INTERNAL_SERVER_ERROR.value(), "Active slack integration already exists for client");
             }
 
             String stateOAuthKey = UUID.randomUUID().toString();

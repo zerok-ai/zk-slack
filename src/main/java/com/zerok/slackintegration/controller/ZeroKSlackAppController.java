@@ -1,5 +1,6 @@
 package com.zerok.slackintegration.controller;
 
+import com.slack.api.methods.SlackApiException;
 import com.zerok.slackintegration.model.response.SlackIntegrationFetchResponse;
 import com.zerok.slackintegration.service.SlackOAuthService;
 import com.zerok.slackintegration.service.ZeroKSlackIntegrationService;
@@ -8,10 +9,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.net.URI;
+import java.net.http.HttpResponse;
 
 @RestController
-@RequestMapping("/u/slack/integration")
+@RequestMapping("/v1/u/slack/integration")
 public class ZeroKSlackAppController {
 
     private final ZeroKSlackIntegrationService slackIntegrationService;
@@ -40,8 +43,9 @@ public class ZeroKSlackAppController {
     //disable slack integration :
     @PostMapping("/disable")
     @ResponseBody
-    public void disableSlackIntegration(@RequestParam String userId, @RequestParam String orgId) {
+    public ResponseEntity<String> disableSlackIntegration(@RequestHeader(value = "X-USER-ID", required = true) String userId, @RequestHeader(value = "X-ORG-ID", required = true) String orgId) throws SlackApiException, IOException {
         slackIntegrationService.disableSlackIntegration(userId, orgId);
+        return ResponseEntity.status(HttpStatus.OK).body("Success");
     }
 
 }

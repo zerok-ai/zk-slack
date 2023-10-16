@@ -28,3 +28,4 @@ public class SlackIntegrationFetchResponse {
     private LocalDateTime createdOn;
     private LocalDateTime updatedOn;
 }
+

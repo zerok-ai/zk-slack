@@ -8,4 +8,5 @@ import java.util.List;
 
 public interface SlackAppService {
     List<String> getSlackChannelsWhereAppInstalled(SlackClientIntegration slackClientIntegration) throws SlackApiException, IOException;
+    void uninstallSlackAppFromWorkSpace(SlackClientIntegration slackClientIntegration) throws SlackApiException, IOException;
 }

@@ -12,7 +12,7 @@ import java.net.URI;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/p/slack/oauth")
+@RequestMapping("/v1/p/slack/oauth")
 public class SlackAuthRedirectionController {
 
     private final SlackOAuthService slackOAuthService;

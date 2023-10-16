@@ -36,3 +36,6 @@ slack:
   redirectUri: "https://a13d-2406-7400-9a-86f1-dd05-8d0-1c72-e14b.ngrok-free.app/p/slack/oauth/redirect"
   signingSecret: "09b15216bb3371d41f72b4d4415b132f"
   appId: "A05UNEQT2JU"
+
+zeroKDashboard:
+  host: "https://dashboard.devcloud01.getanton.com/issues/detail?issue_id={}&trace={}&cluster_id={}"
