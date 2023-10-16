@@ -74,7 +74,7 @@ public class ZeroKSlackIntegrationServiceImpl implements ZeroKSlackIntegrationSe
             //fetch client token
             Optional<SlackClientIntegration> optionalSlackClientIntegration = slackClientIntegrationRepository.findSlackClientIntegrationByOrg(orgId);
 
-            if (!optionalSlackClientIntegration.isPresent()) {
+            if (optionalSlackClientIntegration.isEmpty()) {
                 log.debug("Slack reposting for org not onboarded tp zk-slack app, orgId : {} ", orgId);
                 return null;
             }
@@ -82,7 +82,7 @@ public class ZeroKSlackIntegrationServiceImpl implements ZeroKSlackIntegrationSe
             SlackClientIntegration slackClientIntegration = optionalSlackClientIntegration.get();
             //format the text in a good way
             String text = zeroKIssueInference.getInference();
-            SlackMessage slackMessage = SlackMessageBuilder.createSlackInferenceMessage(zeroKIssueInference);
+            SlackMessage slackMessage = SlackMessageBuilder.generateSlackIntegrationMessage(zeroKIssueInference);
             String slackAccessToken = Utils.decodeFromBase64(slackClientIntegration.getClientAccessToken());
             //fetch client channels
             List<String> slackChannelList = slackAppService.getSlackChannelsWhereAppInstalled(slackClientIntegration);

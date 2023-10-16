@@ -12,6 +12,6 @@ COPY build/libs/zk-slack-0.0.1-SNAPSHOT.jar /deploy/zk-slack.jar
 EXPOSE 80
 
 # Set the entry point to run the JAR file with the application.yaml file
-ENTRYPOINT ["java", "-jar", "your-app.jar", "--spring.config.location=file:/opt/zk-slack-configmap.yaml"]
+ENTRYPOINT ["java", "-jar", "zk-slack.jar", "--spring.config.location=file:/opt/zk-slack-configmap.yaml"]
 
 

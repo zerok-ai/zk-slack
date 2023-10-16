@@ -5,7 +5,6 @@ import com.slack.api.methods.SlackApiException;
 import com.zerok.slackintegration.model.ZeroKIssueInference;
 import com.zerok.slackintegration.service.ZeroKSlackIntegrationService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
