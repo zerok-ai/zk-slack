@@ -10,9 +10,9 @@ data:
     spring:
       datasource:
         driver-class-name: org.postgresql.Driver
+        url: {{ .Values.postgres.url }}
         password: "{{ .Values.postgres.password }}"
         #    url: jdbc:postgresql://postgres.plc.svc.cluster.local:5432/pl
-        url: jdbc:postgresql://{{ .Values.postgres.host }}:{{ .Values.postgres.port }}/pl
         username: "{{ .Values.postgres.user }}"
       jpa:
         hibernate:

@@ -24,6 +24,7 @@ suprsend:
   workspaceKey:  ""
   workspaceSecret:  ""
 postgres:
+  url: "jdbc:postgresql://postgres.plc.svc.cluster.local:5432/pl"
   host: "postgres.plc.svc.cluster.local"
   port: 5432
   user:  "pl"
