@@ -15,12 +15,15 @@ public class SlackClient {
 
     private final WebClient slackWebClient;
 
+    private final SlackConfigProperties slackConfigProperties;
+
     @Autowired
-    public SlackClient(@Qualifier("slackWebClient") WebClient slackWebClient) {
+    public SlackClient(@Qualifier("slackWebClient") WebClient slackWebClient, SlackConfigProperties slackConfigProperties) {
         this.slackWebClient = slackWebClient;
+        this.slackConfigProperties = slackConfigProperties;
     }
 
-    public Mono<String> authenticateAndFetchAccessTokenWithSlack(String code, SlackConfigProperties slackConfigProperties) {
+    public Mono<String> authenticateAndFetchAccessTokenWithSlack(String code) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 

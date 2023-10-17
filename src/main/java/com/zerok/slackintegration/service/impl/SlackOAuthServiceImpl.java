@@ -122,7 +122,9 @@ public class SlackOAuthServiceImpl implements SlackOAuthService {
     public void fetchAndStoreClientAccessTokenFromTempToken(String clientTemporaryAccessToken, String state) throws SlackApiException, IOException {
 
         try {
-            Mono<String> clientAccessTokenMono = slackClient.authenticateAndFetchAccessTokenWithSlack(clientTemporaryAccessToken, slackConfigProperties);
+            Mono<String> clientAccessTokenMono = slackClient.authenticateAndFetchAccessTokenWithSlack(clientTemporaryAccessToken);
+
+            System.out.println("clientAccessTokenMono" + clientAccessTokenMono.toString());
 
             // Subscribe to the Mono to get the client access token
             String clientAccessToken = clientAccessTokenMono
@@ -133,13 +135,19 @@ public class SlackOAuthServiceImpl implements SlackOAuthService {
                         System.err.println("Error while fetching client access token: " + error.getMessage());
                         //TODO :: throw error
                     })
+                    .doFinally(signalType -> {
+                        // This block will be executed whether the Mono completes or errors out
+                        System.out.println("Process completed with signal: " + signalType);
+                    })
                     .block();
             //store access token in slack client integration
             //fetch user and org from stateOAuthTable
-            SlackClientOAuthState slackClientOAuthState = slackClientOAuthStateRepository.findSlackClientOAuthStatesByStateOAuthKey(state);
+            Optional<SlackClientOAuthState> optionalSlackClientOAuthState = slackClientOAuthStateRepository.findSlackClientOAuthStatesByStateOAuthKey(state);
 
             //validate state
-            validateSlackClientOAuthState(slackClientOAuthState);
+            validateSlackClientOAuthState(optionalSlackClientOAuthState);
+
+            SlackClientOAuthState slackClientOAuthState = optionalSlackClientOAuthState.get();
 
             if (StringUtil.isNullOrEmpty(clientAccessToken)) {
                 throw new SlackIntegrationInitiateException("", HttpStatus.INTERNAL_SERVER_ERROR.value(), "Error while creating the slack client access tokenL");
@@ -174,10 +182,15 @@ public class SlackOAuthServiceImpl implements SlackOAuthService {
         }
     }
 
-    private void validateSlackClientOAuthState(SlackClientOAuthState slackClientOAuthState) {
+    private void validateSlackClientOAuthState(Optional<SlackClientOAuthState> optionalSlackClientOAuthState) {
         //write validation methods
         //check if slackClientOAuthState is null or not
-        if (slackClientOAuthState == null || slackClientOAuthState.getOrg() == null || slackClientOAuthState.getCreatedBy() == null) {
+        if(optionalSlackClientOAuthState.isEmpty()){
+            throw new InvalidSlackClientOAuthStateReceived("Invalid state key received from slack", HttpStatus.INTERNAL_SERVER_ERROR.value(), "Invalid state auth key received from slack");
+        }
+        SlackClientOAuthState slackClientOAuthState = optionalSlackClientOAuthState.get();
+        if (slackClientOAuthState.getOrg() == null || slackClientOAuthState.getCreatedBy() == null) {
+            log.error("invalid state value received");
             throw new InvalidSlackClientOAuthStateReceived("Invalid state key received from slack", HttpStatus.INTERNAL_SERVER_ERROR.value(), "Invalid state auth key received from slack");
         }
         //TODO: check for expiry and throw exception accordingly
