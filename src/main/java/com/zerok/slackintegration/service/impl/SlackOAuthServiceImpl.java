@@ -169,7 +169,8 @@ public class SlackOAuthServiceImpl implements SlackOAuthService {
             //TODO : comment later on after testing
             zeroKSlackIntegrationService.tempInference(clientAccessToken);
         } catch (Exception ex) {
-            throw new SlackIntegrationInitiateException("", HttpStatus.INTERNAL_SERVER_ERROR.value(), "Error while creating the slack redirection URL");
+            log.error(ex.getMessage());
+            throw new SlackIntegrationInitiateException(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR.value(), ex.getMessage());
         }
     }
 
