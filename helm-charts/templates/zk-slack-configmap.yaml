@@ -28,11 +28,11 @@ data:
         {{- range .Values.organizations }}
         - {{ . }}
         {{- end }}
-      clientId: "{{ .Values.slack.clientId }}"    #"2752528759122.5974500920640"
-      clientSecret: "{{ .Values.slack.clientSecret }}" #"5a73604214192016035cf5871e1932a9"
+      clientId: "{{ .Values.slack.clientId }}"
+      clientSecret: "{{ .Values.slack.clientSecret }}"
       redirectUri: "{{ .Values.slack.redirectUri }}"
-      signingSecret: "{{ .Values.slack.signingSecret }}" #"09b15216bb3371d41f72b4d4415b132f"
-      appId: "{{ .Values.slack.appId }}"  #"A05UNEQT2JU"
+      signingSecret: "{{ .Values.slack.signingSecret }}"
+      appId: "{{ .Values.slack.appId }}"
 
     zeroKDashboard:
       host: {{ .Values.zeroKDashboard.host }}
