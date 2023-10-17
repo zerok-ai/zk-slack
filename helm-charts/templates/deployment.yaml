@@ -58,6 +58,17 @@ spec:
           - mountPath: /opt/zk-slack-configmap.yaml
             name: zk-slack-configmap
             subPath: zk-slack-configmap.yaml
+          env:
+            - name: POSTGRES_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: pl-db-secrets
+                  key: PL_POSTGRES_PASSWORD
+            - name: POSTGRES_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: pl-db-secrets
+                  key: PL_POSTGRES_USERNAME
       volumes:
       - configMap:
           name: zk-slack-configmap
