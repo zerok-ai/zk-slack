@@ -28,7 +28,7 @@ postgres:
   host: "postgres.plc.svc.cluster.local"
   port: 5432
   user:  "pl"
-  password: ""
+  password: ''
   database: "pl"
 
 zkGpt:
