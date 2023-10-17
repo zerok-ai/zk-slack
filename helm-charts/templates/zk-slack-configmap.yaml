@@ -11,9 +11,9 @@ data:
       datasource:
         driver-class-name: org.postgresql.Driver
         url: {{ .Values.postgres.url }}
-        password: "{{ .Values.postgres.password }}"
+        password: {{ .Values.postgres.password }}
         #    url: jdbc:postgresql://postgres.plc.svc.cluster.local:5432/pl
-        username: "{{ .Values.postgres.user }}"
+        username: {{ .Values.postgres.user }}
       jpa:
         database: postgresql
         show-sql: true
