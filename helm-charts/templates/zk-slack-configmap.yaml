@@ -4,7 +4,7 @@ metadata:
   name: zk-slack-configmap
 
 data: 
-  zk-auth-configmap.yaml: |-
+  zk-slack-configmap.yaml: |-
     server:
       port: 3000
     spring:
