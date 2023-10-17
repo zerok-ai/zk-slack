@@ -15,8 +15,14 @@ data:
         #    url: jdbc:postgresql://postgres.plc.svc.cluster.local:5432/pl
         username: "{{ .Values.postgres.user }}"
       jpa:
+        database: postgresql
+        show-sql: true
+        generate-ddl: true
         hibernate:
           ddl-auto: update
+        properties:
+          hibernate:
+            dialect: org.hibernate.dialect.PostgreSQLDialect
       entity-scan:
         base-package: com.zerok.slackintegration.entities
 
