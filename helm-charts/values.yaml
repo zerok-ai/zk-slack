@@ -104,6 +104,18 @@ slack:
   clientSecret: ""
   signingSecret: ""
   appId: ""
-  scopes: |
-    ['app_mentions:read', 'channels:history', 'channels:join' , 'channels:read', 'chat:write', 'emoji:read', 'groups:read', 'im:read', 'mpim:read', 'im:history', 'incoming-webhook','users:read','chat:write.public']
+  scopes: >
+    app_mentions:read,
+    channels:history,
+    channels:join,
+    channels:read,
+    chat:write,
+    emoji:read,
+    groups:read,
+    im:read,
+    mpim:read,
+    im:history,
+    incoming-webhook,
+    users:read,
+    chat:write.public
   redirectUri: "https://dashboard.loadcloud01.getanton.com/v1/p/slack/oauth/redirect"

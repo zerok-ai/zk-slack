@@ -30,10 +30,20 @@ data:
       com.slack.api: DEBUG
 
     slack:
-      scopes:
-        {{- range .Values.organizations }}
-        - {{ . }}
-        {{- end }}
+      scopes: >
+        app_mentions:read,
+        channels:history,
+        channels:join,
+        channels:read,
+        chat:write,
+        emoji:read,
+        groups:read,
+        im:read,
+        mpim:read,
+        im:history,
+        incoming-webhook,
+        users:read,
+        chat:write.public
       clientId: "{{ .Values.slack.clientId }}"
       clientSecret: "{{ .Values.slack.clientSecret }}"
       redirectUri: "{{ .Values.slack.redirectUri }}"
