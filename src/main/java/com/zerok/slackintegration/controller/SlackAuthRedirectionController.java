@@ -22,8 +22,9 @@ public class SlackAuthRedirectionController {
     }
 
     @GetMapping("/redirect")
-    public void slackAppOAuthRedirect(@RequestParam("code") String code,@RequestParam("state") String state) throws SlackApiException, IOException {
+    public ResponseEntity<Void> slackAppOAuthRedirect(@RequestParam("code") String code,@RequestParam("state") String state) throws SlackApiException, IOException {
         System.out.println("code : "+code);
         slackOAuthService.fetchAndStoreClientAccessTokenFromTempToken(code,state);
+        return ResponseEntity.status(HttpStatus.FOUND).location(URI.create("https://dashboard.loadcloud01.getanton.com/integrations/slack/list")).build();
     }
 }
