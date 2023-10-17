@@ -12,7 +12,7 @@ data:
         driver-class-name: org.postgresql.Driver
         password: "{{ .Values.postgres.password }}"
         #    url: jdbc:postgresql://postgres.plc.svc.cluster.local:5432/pl
-        url: "jdbc:postgresql://{{ .Values.postgres.host }}:{{ .Values.postgres.port }}/pl"
+        url: jdbc:postgresql://{{ .Values.postgres.host }}:{{ .Values.postgres.port }}/pl
         username: "{{ .Values.postgres.user }}"
       jpa:
         hibernate:
