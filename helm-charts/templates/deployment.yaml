@@ -40,18 +40,18 @@ spec:
             - name: http
               containerPort: 3000
               protocol: TCP
-          livenessProbe:
-            httpGet:
-              path: /actuator/health
-              port: http
-            initialDelaySeconds: 60 # Wait for the application to start
-            periodSeconds: 10
-          readinessProbe:
-            httpGet:
-              path: /actuator/health # Adjust the path based on your application
-              port: http
-            initialDelaySeconds: 15 # Wait for the application to start
-            periodSeconds: 10 # Check the readiness every 10 seconds
+{{/*          livenessProbe:*/}}
+{{/*            httpGet:*/}}
+{{/*              path: /actuator/health*/}}
+{{/*              port: http*/}}
+{{/*            initialDelaySeconds: 60 # Wait for the application to start*/}}
+{{/*            periodSeconds: 10*/}}
+{{/*          readinessProbe:*/}}
+{{/*            httpGet:*/}}
+{{/*              path: /actuator/health # Adjust the path based on your application*/}}
+{{/*              port: http*/}}
+{{/*            initialDelaySeconds: 15 # Wait for the application to start*/}}
+{{/*            periodSeconds: 10 # Check the readiness every 10 seconds*/}}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
