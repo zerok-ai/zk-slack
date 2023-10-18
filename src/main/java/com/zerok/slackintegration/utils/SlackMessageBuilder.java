@@ -93,6 +93,14 @@ public class SlackMessageBuilder {
         investigationTitleBlock.setText(investigationTitle);
         blocks.add(investigationTitleBlock);
 
+        SectionBlock section1 = new SectionBlock();
+        MarkdownTextObject section1TextObject = MarkdownTextObject.builder()
+                .text(String.format("*Issue Title*: %s",zeroKInferencePublishRequest.getIssueTitle()))
+
+                .build();
+        section1.setText(section1TextObject);
+        blocks.add(section1);
+
 
         // block 5
         // Inference
@@ -112,7 +120,7 @@ public class SlackMessageBuilder {
                         .build())
                 .style("primary")
                 .value("click_me")
-                .url("https://www.google.com")
+                .url(zeroKInferenceUrl)
                 .build();
         actionsBlock.setElements(Collections.singletonList(viewInvestigationButtonElement));
         blocks.add(actionsBlock);
