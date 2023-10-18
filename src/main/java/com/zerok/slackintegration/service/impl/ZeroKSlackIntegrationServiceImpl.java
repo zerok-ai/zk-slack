@@ -8,8 +8,8 @@ import com.zerok.slackintegration.config.SlackConfigProperties;
 import com.zerok.slackintegration.entities.SlackClientIntegration;
 import com.zerok.slackintegration.entities.VizierCluster;
 import com.zerok.slackintegration.model.request.ZeroKInferencePublishRequest;
-import com.zerok.slackintegration.model.ZkSlackButton;
 import com.zerok.slackintegration.model.enums.SlackIntegrationStatus;
+import com.zerok.slackintegration.model.response.DashboardResponse;
 import com.zerok.slackintegration.model.response.SlackIntegrationFetchResponse;
 import com.zerok.slackintegration.model.slack.SlackMessage;
 import com.zerok.slackintegration.repository.SlackClientIntegrationRepository;
@@ -23,7 +23,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -134,24 +133,28 @@ public class ZeroKSlackIntegrationServiceImpl implements ZeroKSlackIntegrationSe
     }
 
     @Override
-    public SlackIntegrationFetchResponse fetchSlackIntegration(String userId, String orgId) {
+    public DashboardResponse fetchSlackIntegration(String userId, String orgId) {
         //fetch from DB along with status
         Optional<SlackClientIntegration> optionalSlackClientIntegration = slackClientIntegrationRepository.findSlackClientIntegrationByOrg(orgId);
 
         if (optionalSlackClientIntegration.isEmpty()) {
-            return SlackIntegrationFetchResponse.builder()
-                    .orgId(orgId)
-                    .status(SlackIntegrationStatus.PENDING)
-                    .userId(userId)
+            return DashboardResponse.builder()
+                    .payload(SlackIntegrationFetchResponse.builder()
+                            .orgId(orgId)
+                            .status(SlackIntegrationStatus.PENDING)
+                            .userId(userId)
+                            .build())
                     .build();
 
         } else {
             SlackClientIntegration slackClientIntegration = optionalSlackClientIntegration.get();
-            return SlackIntegrationFetchResponse.builder()
-                    .orgId(orgId)
-                    .status(slackClientIntegration.getStatus())
-                    .slackWorkspace(slackClientIntegration.getSlackWorkspace())
-                    .userId(userId)
+            return DashboardResponse.builder()
+                    .payload(SlackIntegrationFetchResponse.builder()
+                            .orgId(orgId)
+                            .status(slackClientIntegration.getStatus())
+                            .slackWorkspace(slackClientIntegration.getSlackWorkspace())
+                            .userId(userId)
+                            .build())
                     .build();
         }
     }

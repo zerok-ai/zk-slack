@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class SlackIntegrationFetchResponse {
+public class SlackIntegrationFetchResponse implements ResponseEntity {
 
     private String orgId;
     private String userId;

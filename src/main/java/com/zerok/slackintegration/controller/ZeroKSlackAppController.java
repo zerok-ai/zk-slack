@@ -1,6 +1,7 @@
 package com.zerok.slackintegration.controller;
 
 import com.slack.api.methods.SlackApiException;
+import com.zerok.slackintegration.model.response.DashboardResponse;
 import com.zerok.slackintegration.model.response.SlackIntegrationFetchResponse;
 import com.zerok.slackintegration.service.SlackOAuthService;
 import com.zerok.slackintegration.service.ZeroKSlackIntegrationService;
@@ -43,7 +44,7 @@ public class ZeroKSlackAppController {
     // get slack integration for user id and org id
     @GetMapping("/fetch")
     @ResponseBody
-    public SlackIntegrationFetchResponse fetchSlackIntegration(@RequestHeader(value = "X-USER-ID", required = true) String userId, @RequestHeader(value = "X-ORG-ID", required = true) String orgId) {
+    public DashboardResponse fetchSlackIntegration(@RequestHeader(value = "X-USER-ID", required = true) String userId, @RequestHeader(value = "X-ORG-ID", required = true) String orgId) {
         return slackIntegrationService.fetchSlackIntegration(userId, orgId);
     }
 
