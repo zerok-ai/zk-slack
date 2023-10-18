@@ -71,7 +71,7 @@ public class SlackMessageBuilder {
 
         // block 3
         SectionBlock zeroKIntroMessageBlock = new SectionBlock();
-        String issueTitleWithLink = String.format("<%s|%s>","www.google.com","issue title");
+        String issueTitleWithLink = String.format("<%s|%s>",zeroKInferenceUrl, zeroKInferencePublishRequest.getIssueTitle());
         MarkdownTextObject zeroKIntroMessage = MarkdownTextObject.builder()
                 .text(String.format("ZeroK has conducted a preliminary investigation for the reported issue : `%s` :loud_sound:",issueTitleWithLink))
                 .build();

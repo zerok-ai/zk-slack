@@ -84,7 +84,7 @@ resources: {}
   #   cpu: 100m
 #   memory: 128Mi
 zeroKDashboard:
-  host: "https://dashboard.devcloud01.getanton.com/issues/detail?issue_id={}&trace={}&cluster_id={}"
+  host: "https://dashboard.loadcloud01.getanton.com/issues/detail?issue_id={}&trace={}&cluster_id={}"
 
 autoscaling:
   enabled: false
