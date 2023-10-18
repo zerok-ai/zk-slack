@@ -154,6 +154,8 @@ public class ZeroKSlackIntegrationServiceImpl implements ZeroKSlackIntegrationSe
                             .status(slackClientIntegration.getStatus())
                             .slackWorkspace(slackClientIntegration.getSlackWorkspace())
                             .userId(userId)
+                            .createdAt(slackClientIntegration.getCreatedOn().toLocalDateTime())
+                            .updatedAt(slackClientIntegration.getUpdatedOn().toLocalDateTime())
                             .build())
                     .build();
         }
