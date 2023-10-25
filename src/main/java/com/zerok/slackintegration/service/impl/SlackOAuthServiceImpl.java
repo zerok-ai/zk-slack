@@ -9,6 +9,8 @@ import com.zerok.slackintegration.entities.SlackClientOAuthState;
 import com.zerok.slackintegration.exception.InvalidSlackClientOAuthStateReceived;
 import com.zerok.slackintegration.exception.SlackIntegrationInitiateException;
 import com.zerok.slackintegration.model.enums.SlackIntegrationStatus;
+import com.zerok.slackintegration.model.response.DashboardResponse;
+import com.zerok.slackintegration.model.response.SlackIntegrationInitiateResponse;
 import com.zerok.slackintegration.repository.SlackClientIntegrationRepository;
 import com.zerok.slackintegration.repository.SlackClientOAuthStateRepository;
 import com.zerok.slackintegration.service.SlackAppService;
@@ -85,7 +87,7 @@ public class SlackOAuthServiceImpl implements SlackOAuthService {
 
 
     @Override
-    public URI createSlackOAuthRedirectionUri(String userId, String org) {
+    public DashboardResponse createSlackOAuthRedirectionUri(String userId, String org) {
 
         try {
             //check for deduplication
@@ -106,10 +108,13 @@ public class SlackOAuthServiceImpl implements SlackOAuthService {
             slackClientOAuthStateRepository.save(slackClientOAuthState);
 
 
-            return URI.create("https://slack.com/oauth/v2/authorize" + "?client_id=" + slackConfigProperties.getClientId() +
+            URI slackOAuthRedirectionUri = URI.create("https://slack.com/oauth/v2/authorize" + "?client_id=" + slackConfigProperties.getClientId() +
                     "&scope=" + String.join(",", slackConfigProperties.getAppScopes()) +
                     "&state=" + String.join(",", stateOAuthKey) +
                     "&redirect_uri=" + slackConfigProperties.getRedirectUri());
+
+            return DashboardResponse.builder().payload(SlackIntegrationInitiateResponse.builder().redirectUrl(slackOAuthRedirectionUri.toString()).orgId(org).userId(userId).build()).build();
+
         } catch (Exception ex) {
             log.error(ex.getMessage());
             throw new SlackIntegrationInitiateException(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR.value(), "Error while creating the slack redirection URL");

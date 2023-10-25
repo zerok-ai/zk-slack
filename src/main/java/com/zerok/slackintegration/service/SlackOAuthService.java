@@ -1,6 +1,7 @@
 package com.zerok.slackintegration.service;
 
 import com.slack.api.methods.SlackApiException;
+import com.zerok.slackintegration.model.response.DashboardResponse;
 
 import java.io.IOException;
 import java.net.URI;
@@ -10,6 +11,6 @@ public interface SlackOAuthService {
 
     String exchangeAuthorizationCodeForAccessToken(String code);
 
-    URI createSlackOAuthRedirectionUri(String userId, String org);
+    DashboardResponse createSlackOAuthRedirectionUri(String userId, String org);
 }
 

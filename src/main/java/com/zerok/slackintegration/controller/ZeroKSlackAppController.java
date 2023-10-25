@@ -3,6 +3,7 @@ package com.zerok.slackintegration.controller;
 import com.slack.api.methods.SlackApiException;
 import com.zerok.slackintegration.model.response.DashboardResponse;
 import com.zerok.slackintegration.model.response.SlackIntegrationFetchResponse;
+import com.zerok.slackintegration.model.response.SlackIntegrationInitiateResponse;
 import com.zerok.slackintegration.service.SlackOAuthService;
 import com.zerok.slackintegration.service.ZeroKSlackIntegrationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,17 +30,13 @@ public class ZeroKSlackAppController {
     }
 
     @PostMapping(value = "/initiate")
-    public ResponseEntity<Void> redirect(@RequestHeader(value = "X-USER-ID", required = true) String userId, @RequestHeader(value = "X-ORG-ID", required = true)  String org) {
-        URI slackOAuthRedirectionUri = slackOAuthService.createSlackOAuthRedirectionUri(userId,org);
-        System.out.println("redirection URL : "+ slackOAuthRedirectionUri.toString());
-        return ResponseEntity.status(HttpStatus.FOUND).location(slackOAuthRedirectionUri).build();
+    public DashboardResponse redirect(@RequestHeader(value = "X-USER-ID", required = true) String userId, @RequestHeader(value = "X-ORG-ID", required = true)  String org) {
+        return slackOAuthService.createSlackOAuthRedirectionUri(userId,org);
     }
 
     @GetMapping(value = "/initiate")
-    public RedirectView testredirect(@RequestHeader(value = "X-USER-ID", required = true) String userId, @RequestHeader(value = "X-ORG-ID", required = true)  String org) {
-        URI slackOAuthRedirectionUri = slackOAuthService.createSlackOAuthRedirectionUri(userId,org);
-        System.out.println("redirection URL : "+ slackOAuthRedirectionUri.toString());
-        return new RedirectView(slackOAuthRedirectionUri.toString());
+    public DashboardResponse testredirect(@RequestHeader(value = "X-USER-ID", required = true) String userId, @RequestHeader(value = "X-ORG-ID", required = true)  String org) {
+        return slackOAuthService.createSlackOAuthRedirectionUri(userId,org);
     }
 
     // get slack integration for user id and org id
