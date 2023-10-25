@@ -29,8 +29,7 @@ public class Utils {
     }
 
     public static String getUTCDateTimeFromTimestamp(long timestamp){
-        Instant instant = Instant.ofEpochSecond(timestamp);
-
+        Instant instant = Instant.ofEpochMilli(timestamp);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS 'Z'")
                 .withZone(ZoneOffset.UTC);
         return formatter.format(instant);
