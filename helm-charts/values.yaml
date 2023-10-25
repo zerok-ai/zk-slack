@@ -118,4 +118,4 @@ slack:
     incoming-webhook,
     users:read,
     chat:write.public
-  redirectUri: "https://dashboard.loadcloud01.getanton.com/v1/p/slack/oauth/redirect"
+  redirectUri: "https://dashboard.democloud01.getanton.com/v1/p/slack/oauth/redirect"
