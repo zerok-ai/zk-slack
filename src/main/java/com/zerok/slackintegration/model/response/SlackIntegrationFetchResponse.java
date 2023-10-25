@@ -25,8 +25,8 @@ public class SlackIntegrationFetchResponse implements ResponseEntity {
     @JsonProperty("slack_workspace")
     private String slackWorkspace;
     @JsonProperty("created_at")
-    private LocalDateTime createdAt;
+    private String createdAt;
     @JsonProperty("updated_at")
-    private LocalDateTime updatedAt;
+    private String updatedAt;
 }
 
