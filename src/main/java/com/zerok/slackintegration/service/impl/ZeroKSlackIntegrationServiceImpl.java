@@ -183,31 +183,4 @@ public class ZeroKSlackIntegrationServiceImpl implements ZeroKSlackIntegrationSe
             log.debug(String.format("Deleting slack integration for org: %s by userId: %s",orgId, userId));
         }
     }
-
-
-    public void tempInference(String token) throws SlackApiException, IOException {
-        //write logic here for publishing the inference
-        // exception handling
-//        try{
-        //fetch bot token specific to clientId
-
-//        String token = slackApp.config().getSingleTeamBotToken();
-
-        ChatPostMessageRequest chatPostMessageRequest = ChatPostMessageRequest.builder()
-                .channel("zerok")
-                .text("i am ZeroK Slack Bot")
-                .token(token)
-                .build();
-        ChatPostMessageResponse chatPostMessageResponse = slackApp.client().
-                chatPostMessage(chatPostMessageRequest);
-        chatPostMessageResponse.getMessage().getText();
-//        }
-//        catch (SlackApiException e){
-//            logger.error("Exception while making slack api call");
-//        }
-//        catch (Exception e){
-//            logger.error(e.getMessage());
-//        }
-
-    }
 }

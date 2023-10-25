@@ -174,8 +174,6 @@ public class SlackOAuthServiceImpl implements SlackOAuthService {
                     .build();
 
             slackClientIntegrationRepository.save(slackClientIntegration);
-            //TODO : comment later on after testing
-            zeroKSlackIntegrationService.tempInference(clientAccessToken);
         } catch (Exception ex) {
             log.error(ex.getMessage());
             throw new SlackIntegrationInitiateException(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR.value(), ex.getMessage());
