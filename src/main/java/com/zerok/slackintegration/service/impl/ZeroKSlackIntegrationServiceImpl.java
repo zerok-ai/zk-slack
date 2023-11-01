@@ -4,7 +4,9 @@ import com.slack.api.bolt.App;
 import com.slack.api.methods.SlackApiException;
 import com.slack.api.methods.request.chat.ChatPostMessageRequest;
 import com.slack.api.methods.response.chat.ChatPostMessageResponse;
+import com.zerok.slackintegration.client.SlackClient;
 import com.zerok.slackintegration.config.SlackConfigProperties;
+import com.zerok.slackintegration.entities.SlackClientIncomingWebhookEntity;
 import com.zerok.slackintegration.entities.SlackClientIntegration;
 import com.zerok.slackintegration.entities.VizierCluster;
 import com.zerok.slackintegration.model.request.ZeroKInferencePublishRequest;
@@ -12,6 +14,7 @@ import com.zerok.slackintegration.model.enums.SlackIntegrationStatus;
 import com.zerok.slackintegration.model.response.DashboardResponse;
 import com.zerok.slackintegration.model.response.SlackIntegrationFetchResponse;
 import com.zerok.slackintegration.model.slack.SlackMessage;
+import com.zerok.slackintegration.repository.SlackClientIncomingWebhookRepository;
 import com.zerok.slackintegration.repository.SlackClientIntegrationRepository;
 import com.zerok.slackintegration.repository.VizierClusterRepository;
 import com.zerok.slackintegration.service.SlackAppService;
@@ -42,17 +45,23 @@ public class ZeroKSlackIntegrationServiceImpl implements ZeroKSlackIntegrationSe
 
     private final SlackAppService slackAppService;
 
+    private final SlackClient slackClient;
+
     private final SlackClientIntegrationRepository slackClientIntegrationRepository;
+
+    private final SlackClientIncomingWebhookRepository slackClientIncomingWebhookRepository;
 
     private final VizierClusterRepository vizierClusterRepository;
 
     private final SlackConfigProperties slackConfigProperties;
 
     @Autowired
-    public ZeroKSlackIntegrationServiceImpl(App slackApp, SlackAppService slackAppService, SlackClientIntegrationRepository slackClientIntegrationRepository, VizierClusterRepository vizierClusterRepository, SlackConfigProperties slackConfigProperties) {
+    public ZeroKSlackIntegrationServiceImpl(App slackApp, SlackAppService slackAppService, SlackClient slackClient, SlackClientIntegrationRepository slackClientIntegrationRepository, SlackClientIncomingWebhookRepository slackClientIncomingWebhookRepository, VizierClusterRepository vizierClusterRepository, SlackConfigProperties slackConfigProperties) {
         this.slackApp = slackApp;
         this.slackAppService = slackAppService;
+        this.slackClient = slackClient;
         this.slackClientIntegrationRepository = slackClientIntegrationRepository;
+        this.slackClientIncomingWebhookRepository = slackClientIncomingWebhookRepository;
         this.vizierClusterRepository = vizierClusterRepository;
         this.slackConfigProperties = slackConfigProperties;
     }
@@ -64,7 +73,6 @@ public class ZeroKSlackIntegrationServiceImpl implements ZeroKSlackIntegrationSe
         try {
             //fetch bot token specific to clientId
 
-            //TODO : uncomment after testing
             //fetch org info from cluster id
             Optional<VizierCluster> optionalVizierCluster = vizierClusterRepository.findVizierClusterById(UUID.fromString(zeroKInferencePublishRequest.getClusterId()));
 
@@ -74,12 +82,11 @@ public class ZeroKSlackIntegrationServiceImpl implements ZeroKSlackIntegrationSe
             }
 
             String orgId = optionalVizierCluster.get().getOrgId().toString();
-            //String orgId = "zerok";
-            //fetch client token
+
             Optional<SlackClientIntegration> optionalSlackClientIntegration = slackClientIntegrationRepository.findSlackClientIntegrationByOrg(orgId);
 
             if (optionalSlackClientIntegration.isEmpty()) {
-                log.debug("Slack reposting for org not onboarded tp zk-slack app, orgId : {} ", orgId);
+                log.debug("Slack reposting for org not onboarded to zk-slack app, orgId : {} ", orgId);
                 return null;
             }
 
@@ -117,6 +124,10 @@ public class ZeroKSlackIntegrationServiceImpl implements ZeroKSlackIntegrationSe
                     throw new RuntimeException(e);
                 }
             });
+
+            //fetch webhook channel : and publish to webhook channel if not present in success channels
+            publishInferenceToSlackWebhookIntegrationChannel(orgId, slackMessage);
+
             System.out.println("success: + ");
             System.out.println(successChannels);
             System.out.println("failed: + ");
@@ -130,6 +141,19 @@ public class ZeroKSlackIntegrationServiceImpl implements ZeroKSlackIntegrationSe
             logger.error(e.getMessage());
         }
         return null;
+    }
+
+    private void publishInferenceToSlackWebhookIntegrationChannel(String org, SlackMessage slackMessage) {
+        //fetch webhook integration if present:
+        List<SlackClientIncomingWebhookEntity> slackWebhookIntegratedChannels = slackClientIncomingWebhookRepository.findSlackClientIncomingWebhookEntitiesBy(org);
+
+        if(slackWebhookIntegratedChannels.isEmpty()){
+            log.info("No webhook channel found for org: {}", org);
+            return;
+        }
+        //publish inference to slack
+        slackClient.publishInferenceToSlackWebhookIntegrationChannels(slackWebhookIntegratedChannels,slackMessage);
+
     }
 
     @Override
@@ -177,10 +201,12 @@ public class ZeroKSlackIntegrationServiceImpl implements ZeroKSlackIntegrationSe
             Timestamp currentTimestamp = new Timestamp(currentTimeMillis);
             slackClientIntegration.setUpdatedOn(currentTimestamp);
             slackClientIntegration.setUpdatedBy(userId);
-            //uninstall slack app from a workspace
+            //uninstall Slack app from a workspace
             slackAppService.uninstallSlackAppFromWorkSpace(slackClientIntegration);
             slackClientIntegrationRepository.delete(slackClientIntegration);
             log.debug(String.format("Deleting slack integration for org: %s by userId: %s",orgId, userId));
+            slackClientIncomingWebhookRepository.deleteSlackClientIncomingWebhookEntitiesByOrg(orgId);
+            log.info("Deleted all the webhook channels for org:{} because received disable request",orgId);
         }
     }
 }

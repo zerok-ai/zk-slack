@@ -1,6 +1,9 @@
 package com.zerok.slackintegration.client;
 
 import com.zerok.slackintegration.config.SlackConfigProperties;
+import com.zerok.slackintegration.entities.SlackClientIncomingWebhookEntity;
+import com.zerok.slackintegration.model.slack.SlackMessage;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
@@ -10,16 +13,22 @@ import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
+
+@Slf4j
 @Component
 public class SlackClient {
 
     private final WebClient slackWebClient;
 
+    private final WebClient slackWebhookClient;
+
     private final SlackConfigProperties slackConfigProperties;
 
     @Autowired
-    public SlackClient(@Qualifier("slackWebClient") WebClient slackWebClient, SlackConfigProperties slackConfigProperties) {
+    public SlackClient(@Qualifier("slackWebClient") WebClient slackWebClient,@Qualifier("slackWebhookClient") WebClient slackWebhookClient, SlackConfigProperties slackConfigProperties) {
         this.slackWebClient = slackWebClient;
+        this.slackWebhookClient = slackWebhookClient;
         this.slackConfigProperties = slackConfigProperties;
     }
 
@@ -49,5 +58,22 @@ public class SlackClient {
         // Adapt this based on Slack API response format
         String accessToken = responseBody.split("\"access_token\":\"")[1].split("\"")[0];
         return Mono.just(accessToken);
+    }
+
+    public void publishInferenceToSlackWebhookIntegrationChannels(List<SlackClientIncomingWebhookEntity> slackClientIncomingWebhookEntityList, SlackMessage slackMessage){
+        slackClientIncomingWebhookEntityList.forEach(entity-> {
+            try{
+                String response = slackWebhookClient.post()
+                        .uri(entity.getSlackWebhookUrl())
+                        .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .body(BodyInserters.fromValue(slackMessage))
+                        .retrieve()
+                        .bodyToMono(String.class).toString();
+                log.info("sucessfully published the inference for org: {} to slack channel: {}",entity.getOrg(),entity.getSlackChannel());
+            }
+            catch (Exception e){
+                log.error("error file publishing to webhook channel : {}",entity.getSlackChannel());
+            }
+        });
     }
 }

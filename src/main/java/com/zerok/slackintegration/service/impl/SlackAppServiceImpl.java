@@ -5,9 +5,11 @@ import com.slack.api.methods.SlackApiException;
 import com.slack.api.methods.request.apps.AppsUninstallRequest;
 import com.slack.api.methods.request.auth.AuthTestRequest;
 import com.slack.api.methods.request.conversations.ConversationsListRequest;
+import com.slack.api.methods.request.oauth.OAuthV2AccessRequest;
 import com.slack.api.methods.response.apps.AppsUninstallResponse;
 import com.slack.api.methods.response.auth.AuthTestResponse;
 import com.slack.api.methods.response.conversations.ConversationsListResponse;
+import com.slack.api.methods.response.oauth.OAuthV2AccessResponse;
 import com.slack.api.model.Conversation;
 import com.zerok.slackintegration.config.SlackConfigProperties;
 import com.zerok.slackintegration.entities.SlackClientIntegration;
@@ -83,5 +85,15 @@ public class SlackAppServiceImpl implements SlackAppService {
         return slackApp.client().authTest(authTestRequest);
     }
 
+    @Override
+    public OAuthV2AccessResponse fetchAccessTokenAndIncomingWebhooksForIntegration(String code) throws SlackApiException, IOException {
+        OAuthV2AccessRequest oAuthV2AccessRequest = OAuthV2AccessRequest.builder()
+                .redirectUri(slackConfigProperties.getRedirectUri())
+                .code(code)
+                .clientSecret(slackConfigProperties.getClientSecret())
+                .clientId(slackConfigProperties.getClientId())
+                .build();
+        return slackApp.client().oauthV2Access(oAuthV2AccessRequest);
+    }
 
 }

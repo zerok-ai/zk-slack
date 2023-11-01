@@ -2,8 +2,10 @@ package com.zerok.slackintegration.service.impl;
 
 import com.slack.api.methods.SlackApiException;
 import com.slack.api.methods.response.auth.AuthTestResponse;
+import com.slack.api.methods.response.oauth.OAuthV2AccessResponse;
 import com.zerok.slackintegration.client.SlackClient;
 import com.zerok.slackintegration.config.SlackConfigProperties;
+import com.zerok.slackintegration.entities.SlackClientIncomingWebhookEntity;
 import com.zerok.slackintegration.entities.SlackClientIntegration;
 import com.zerok.slackintegration.entities.SlackClientOAuthState;
 import com.zerok.slackintegration.exception.InvalidSlackClientOAuthStateReceived;
@@ -11,6 +13,7 @@ import com.zerok.slackintegration.exception.SlackIntegrationInitiateException;
 import com.zerok.slackintegration.model.enums.SlackIntegrationStatus;
 import com.zerok.slackintegration.model.response.DashboardResponse;
 import com.zerok.slackintegration.model.response.SlackIntegrationInitiateResponse;
+import com.zerok.slackintegration.repository.SlackClientIncomingWebhookRepository;
 import com.zerok.slackintegration.repository.SlackClientIntegrationRepository;
 import com.zerok.slackintegration.repository.SlackClientOAuthStateRepository;
 import com.zerok.slackintegration.service.SlackAppService;
@@ -23,7 +26,6 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
-import reactor.core.publisher.Mono;
 
 import java.io.IOException;
 import java.net.URI;
@@ -40,16 +42,19 @@ public class SlackOAuthServiceImpl implements SlackOAuthService {
 
     private final SlackClientIntegrationRepository slackClientIntegrationRepository;
 
+    private final SlackClientIncomingWebhookRepository slackClientIncomingWebhookRepository;
+
     private final SlackAppService slackAppService;
 
     private final ZeroKSlackIntegrationServiceImpl zeroKSlackIntegrationService;
 
     @Autowired
-    public SlackOAuthServiceImpl(SlackConfigProperties slackConfigProperties, SlackClient slackClient, SlackClientOAuthStateRepository slackClientOAuthStateRepository, SlackClientIntegrationRepository slackClientIntegrationRepository, SlackAppService slackAppService, ZeroKSlackIntegrationServiceImpl zeroKSlackIntegrationService) {
+    public SlackOAuthServiceImpl(SlackConfigProperties slackConfigProperties, SlackClient slackClient, SlackClientOAuthStateRepository slackClientOAuthStateRepository, SlackClientIntegrationRepository slackClientIntegrationRepository, SlackClientIncomingWebhookRepository slackClientIncomingWebhookRepository, SlackAppService slackAppService, ZeroKSlackIntegrationServiceImpl zeroKSlackIntegrationService) {
         this.slackConfigProperties = slackConfigProperties;
         this.slackClient = slackClient;
         this.slackClientOAuthStateRepository = slackClientOAuthStateRepository;
         this.slackClientIntegrationRepository = slackClientIntegrationRepository;
+        this.slackClientIncomingWebhookRepository = slackClientIncomingWebhookRepository;
         this.slackAppService = slackAppService;
         this.zeroKSlackIntegrationService = zeroKSlackIntegrationService;
     }
@@ -127,24 +132,30 @@ public class SlackOAuthServiceImpl implements SlackOAuthService {
     public void fetchAndStoreClientAccessTokenFromTempToken(String clientTemporaryAccessToken, String state) throws SlackApiException, IOException {
 
         try {
-            Mono<String> clientAccessTokenMono = slackClient.authenticateAndFetchAccessTokenWithSlack(clientTemporaryAccessToken);
+//            Mono<String> clientAccessTokenMono = slackClient.authenticateAndFetchAccessTokenWithSlack(clientTemporaryAccessToken);
 
-            System.out.println("clientAccessTokenMono" + clientAccessTokenMono.toString());
+            OAuthV2AccessResponse oAuthV2AccessResponse = slackAppService.fetchAccessTokenAndIncomingWebhooksForIntegration(clientTemporaryAccessToken);
 
-            // Subscribe to the Mono to get the client access token
-            String clientAccessToken = clientAccessTokenMono
-                    .doOnNext(token -> {
-                        System.out.println("Received client access token from Slack: " + token);
-                    })
-                    .doOnError(error -> {
-                        System.err.println("Error while fetching client access token: " + error.getMessage());
-                        //TODO :: throw error
-                    })
-                    .doFinally(signalType -> {
-                        // This block will be executed whether the Mono completes or errors out
-                        System.out.println("Process completed with signal: " + signalType);
-                    })
-                    .block();
+            String clientAccessToken = oAuthV2AccessResponse.getAccessToken();
+
+            log.info("Successfully fetched Org's access token integrated with team: {}",oAuthV2AccessResponse.getTeam().getName());
+
+//            System.out.println("clientAccessTokenMono" + clientAccessTokenMono.toString());
+//
+//            // Subscribe to the Mono to get the client access token
+//            String clientAccessToken = clientAccessTokenMono
+//                    .doOnNext(token -> {
+//                        System.out.println("Received client access token from Slack: " + token);
+//                    })
+//                    .doOnError(error -> {
+//                        System.err.println("Error while fetching client access token: " + error.getMessage());
+//                        //TODO :: throw error
+//                    })
+//                    .doFinally(signalType -> {
+//                        // This block will be executed whether the Mono completes or errors out
+//                        System.out.println("Process completed with signal: " + signalType);
+//                    })
+//                    .block();
             //store access token in slack client integration
             //fetch user and org from stateOAuthTable
             Optional<SlackClientOAuthState> optionalSlackClientOAuthState = slackClientOAuthStateRepository.findSlackClientOAuthStatesByStateOAuthKey(state);
@@ -179,6 +190,19 @@ public class SlackOAuthServiceImpl implements SlackOAuthService {
                     .build();
 
             slackClientIntegrationRepository.save(slackClientIntegration);
+            //store  incoming webhooks as well
+            //TODO:: add optional in each of below for NPE
+            SlackClientIncomingWebhookEntity slackClientIncomingWebhookEntity = SlackClientIncomingWebhookEntity.builder()
+                    .slackWebhookUrl(oAuthV2AccessResponse.getIncomingWebhook().getUrl())
+                    .slackChannel(oAuthV2AccessResponse.getIncomingWebhook().getChannel())
+                    .slackTeamId(authTestResponse.getTeamId())
+                    .slackChannelId(oAuthV2AccessResponse.getIncomingWebhook().getChannelId())
+                    .slackWebhookConfigurationUrl(oAuthV2AccessResponse.getIncomingWebhook().getConfigurationUrl())
+                    .org(slackClientOAuthState.getOrg())
+                    .createdBy(slackClientOAuthState.getCreatedBy())
+                    .build();
+            slackClientIncomingWebhookRepository.save(slackClientIncomingWebhookEntity);
+
         } catch (Exception ex) {
             log.error(ex.getMessage());
             throw new SlackIntegrationInitiateException(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR.value(), ex.getMessage());
