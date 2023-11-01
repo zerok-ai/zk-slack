@@ -44,4 +44,4 @@ slack:
   appId: "A05UNEQT2JU"
 
 zeroKDashboard:
-  host: "https://dashboard.loadcloud01.getanton.com/issues/detail?issue_id=%s&trace=%s&cluster_id=%s"
+  host: "https://dashboard.democloud01.zerok.dev/issues/detail?issue_id=%s&trace=%s&cluster_id=%s"

@@ -1,12 +1,17 @@
 package com.zerok.slackintegration.client;
 
+import com.slack.api.Slack;
+import com.slack.api.webhook.Payload;
+import com.slack.api.webhook.WebhookResponse;
 import com.zerok.slackintegration.config.SlackConfigProperties;
 import com.zerok.slackintegration.entities.SlackClientIncomingWebhookEntity;
+import com.zerok.slackintegration.exception.SlackInferencePublishException;
 import com.zerok.slackintegration.model.slack.SlackMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.BodyInserters;
@@ -21,15 +26,15 @@ public class SlackClient {
 
     private final WebClient slackWebClient;
 
-    private final WebClient slackWebhookClient;
+    private final Slack slackInstance;
 
     private final SlackConfigProperties slackConfigProperties;
 
     @Autowired
-    public SlackClient(@Qualifier("slackWebClient") WebClient slackWebClient,@Qualifier("slackWebhookClient") WebClient slackWebhookClient, SlackConfigProperties slackConfigProperties) {
+    public SlackClient(@Qualifier("slackWebClient") WebClient slackWebClient, SlackConfigProperties slackConfigProperties) {
         this.slackWebClient = slackWebClient;
-        this.slackWebhookClient = slackWebhookClient;
         this.slackConfigProperties = slackConfigProperties;
+        this.slackInstance = Slack.getInstance();
     }
 
     public Mono<String> authenticateAndFetchAccessTokenWithSlack(String code) {
@@ -63,12 +68,11 @@ public class SlackClient {
     public void publishInferenceToSlackWebhookIntegrationChannels(List<SlackClientIncomingWebhookEntity> slackClientIncomingWebhookEntityList, SlackMessage slackMessage){
         slackClientIncomingWebhookEntityList.forEach(entity-> {
             try{
-                String response = slackWebhookClient.post()
-                        .uri(entity.getSlackWebhookUrl())
-                        .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                        .body(BodyInserters.fromValue(slackMessage))
-                        .retrieve()
-                        .bodyToMono(String.class).toString();
+                Payload payload = Payload.builder()
+                        .blocks(slackMessage.getBlocks())
+                        .build();
+                WebhookResponse response = slackInstance.send(entity.getSlackWebhookUrl(), payload);
+                System.out.println(response); // WebhookResponse(code=200, message=OK, body=ok)
                 log.info("sucessfully published the inference for org: {} to slack channel: {}",entity.getOrg(),entity.getSlackChannel());
             }
             catch (Exception e){
