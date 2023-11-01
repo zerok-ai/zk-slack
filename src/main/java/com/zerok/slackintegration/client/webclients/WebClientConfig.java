@@ -21,5 +21,12 @@ public class WebClientConfig {
                 .build();
     }
 
+    @Bean(name = "slackWebhookClient")
+    public WebClient slackWebhookClient() {
+        return  WebClient.builder()
+                .build();
+    }
+
+
 }
 
