@@ -3,7 +3,6 @@ package com.zerok.slackintegration.service.impl;
 import com.slack.api.methods.SlackApiException;
 import com.slack.api.methods.response.auth.AuthTestResponse;
 import com.slack.api.methods.response.oauth.OAuthV2AccessResponse;
-import com.zerok.slackintegration.client.SlackClient;
 import com.zerok.slackintegration.config.SlackConfigProperties;
 import com.zerok.slackintegration.entities.SlackClientIncomingWebhookEntity;
 import com.zerok.slackintegration.entities.SlackClientIntegration;
@@ -37,7 +36,6 @@ import java.util.UUID;
 public class SlackOAuthServiceImpl implements SlackOAuthService {
 
     private final SlackConfigProperties slackConfigProperties;
-    private final SlackClient slackClient;
     private final SlackClientOAuthStateRepository slackClientOAuthStateRepository;
 
     private final SlackClientIntegrationRepository slackClientIntegrationRepository;
@@ -46,17 +44,13 @@ public class SlackOAuthServiceImpl implements SlackOAuthService {
 
     private final SlackAppService slackAppService;
 
-    private final ZeroKSlackIntegrationServiceImpl zeroKSlackIntegrationService;
-
     @Autowired
-    public SlackOAuthServiceImpl(SlackConfigProperties slackConfigProperties, SlackClient slackClient, SlackClientOAuthStateRepository slackClientOAuthStateRepository, SlackClientIntegrationRepository slackClientIntegrationRepository, SlackClientIncomingWebhookRepository slackClientIncomingWebhookRepository, SlackAppService slackAppService, ZeroKSlackIntegrationServiceImpl zeroKSlackIntegrationService) {
+    public SlackOAuthServiceImpl(SlackConfigProperties slackConfigProperties, SlackClientOAuthStateRepository slackClientOAuthStateRepository, SlackClientIntegrationRepository slackClientIntegrationRepository, SlackClientIncomingWebhookRepository slackClientIncomingWebhookRepository, SlackAppService slackAppService) {
         this.slackConfigProperties = slackConfigProperties;
-        this.slackClient = slackClient;
         this.slackClientOAuthStateRepository = slackClientOAuthStateRepository;
         this.slackClientIntegrationRepository = slackClientIntegrationRepository;
         this.slackClientIncomingWebhookRepository = slackClientIncomingWebhookRepository;
         this.slackAppService = slackAppService;
-        this.zeroKSlackIntegrationService = zeroKSlackIntegrationService;
     }
 
     public String exchangeAuthorizationCodeForAccessToken(String code) {

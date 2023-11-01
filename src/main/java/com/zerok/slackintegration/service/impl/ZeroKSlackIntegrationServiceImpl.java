@@ -145,7 +145,7 @@ public class ZeroKSlackIntegrationServiceImpl implements ZeroKSlackIntegrationSe
 
     private void publishInferenceToSlackWebhookIntegrationChannel(String org, SlackMessage slackMessage) {
         //fetch webhook integration if present:
-        List<SlackClientIncomingWebhookEntity> slackWebhookIntegratedChannels = slackClientIncomingWebhookRepository.findSlackClientIncomingWebhookEntitiesBy(org);
+        List<SlackClientIncomingWebhookEntity> slackWebhookIntegratedChannels = slackClientIncomingWebhookRepository.findSlackClientIncomingWebhookEntitiesByOrg(org);
 
         if(slackWebhookIntegratedChannels.isEmpty()){
             log.info("No webhook channel found for org: {}", org);

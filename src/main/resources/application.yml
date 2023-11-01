@@ -5,7 +5,7 @@ spring:
     driver-class-name: org.postgresql.Driver
     password: ""
 #    url: jdbc:postgresql://postgres.plc.svc.cluster.local:5432/pl
-    url: jdbc:postgresql://localhost:5555/pl
+    url: jdbc:postgresql://localhost:5401/pl
     username: "pl"
   jpa:
     database: postgresql
