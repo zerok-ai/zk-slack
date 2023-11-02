@@ -25,7 +25,7 @@ public class Utils {
     }
 
     public static String generateDashboardIssueUrl(String zeroKDashboardUrl, ZeroKInferencePublishRequest zeroKInferencePublishRequest){
-        return String.format(zeroKDashboardUrl,zeroKInferencePublishRequest.getIssueId(),zeroKInferencePublishRequest.getIssueId(),zeroKInferencePublishRequest.getClusterId());
+        return String.format(zeroKDashboardUrl,zeroKInferencePublishRequest.getIssueId(),zeroKInferencePublishRequest.getIncidentId(),zeroKInferencePublishRequest.getClusterId());
     }
 
     public static String getUTCDateTimeFromTimestamp(long timestamp){
