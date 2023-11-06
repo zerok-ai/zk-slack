@@ -3,52 +3,16 @@ package com.zerok.slackintegration.utils;
 import com.slack.api.model.block.*;
 import com.slack.api.model.block.composition.MarkdownTextObject;
 import com.slack.api.model.block.composition.PlainTextObject;
-import com.slack.api.model.block.composition.TextObject;
 import com.slack.api.model.block.element.ButtonElement;
 import com.zerok.slackintegration.model.request.ZeroKInferencePublishRequest;
 import com.zerok.slackintegration.model.slack.SlackMessage;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class SlackMessageBuilder {
 
-    public static SlackMessage createSlackInferenceMessage(ZeroKInferencePublishRequest zeroKInferencePublishRequest) {
-        SlackMessage slackMessage = new SlackMessage();
-
-        List<LayoutBlock> blocks = new ArrayList<>();
-
-        // Section 1
-        SectionBlock section1 = new SectionBlock();
-        MarkdownTextObject section1TextObject = MarkdownTextObject.builder()
-                .text("Zerok has found new issue :\n*<fakeLink.toEmployeeProfile.com|ZeroK Dashboard Issue Link>*")
-                .build();
-        section1.setText(section1TextObject);
-        blocks.add(section1);
-        // Divider
-        DividerBlock divider = DividerBlock.builder().build();
-        blocks.add(divider);
-
-        // Section 2
-        List<TextObject> section2FeildObjectList = new ArrayList<>();
-        section2FeildObjectList.add(MarkdownTextObject.builder()
-                        .text(String.format("*Issue Id:*\n %s", zeroKInferencePublishRequest.getIssueId()))
-                .build());
-        section2FeildObjectList.add(MarkdownTextObject.builder()
-                .text(String.format("*Incident Id:*\n %s)", zeroKInferencePublishRequest.getIncidentId()))
-                .build());
-        section2FeildObjectList.add(MarkdownTextObject.builder()
-                .text(String.format("*Inference:*\n %s", zeroKInferencePublishRequest.getInference()))
-                .build());
-
-        SectionBlock section2 = SectionBlock.builder()
-                .fields(section2FeildObjectList)
-                .build();
-        blocks.add(section2);
-
-        slackMessage.setBlocks(blocks);
-
-        return slackMessage;
-    }
 
     public static SlackMessage generateSlackIntegrationMessage(ZeroKInferencePublishRequest zeroKInferencePublishRequest, String zeroKInferenceUrl){
         SlackMessage slackMessage = new SlackMessage();

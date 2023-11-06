@@ -1,10 +1,10 @@
 package com.zerok.slackintegration.controller;
 
-import com.slack.api.bolt.App;
-import com.slack.api.bolt.servlet.SlackAppServlet;
-import jakarta.servlet.annotation.WebServlet;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
 

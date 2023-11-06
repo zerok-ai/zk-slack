@@ -2,8 +2,6 @@ package com.zerok.slackintegration.config;
 
 import com.slack.api.bolt.App;
 import com.slack.api.bolt.AppConfig;
-import com.zerok.slackintegration.config.SlackConfigProperties;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -34,9 +32,6 @@ public class SlackApp {
         if (config.getClientId() != null) {
             app.asOAuthApp(true);
         }
-//        app.command("/hello", (req, ctx) -> {
-//            return ctx.ack(r -> r.text("Thanks!"));
-//        });
         return app;
     }
 

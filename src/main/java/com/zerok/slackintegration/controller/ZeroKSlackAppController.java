@@ -2,19 +2,14 @@ package com.zerok.slackintegration.controller;
 
 import com.slack.api.methods.SlackApiException;
 import com.zerok.slackintegration.model.response.DashboardResponse;
-import com.zerok.slackintegration.model.response.SlackIntegrationFetchResponse;
-import com.zerok.slackintegration.model.response.SlackIntegrationInitiateResponse;
 import com.zerok.slackintegration.service.SlackOAuthService;
 import com.zerok.slackintegration.service.ZeroKSlackIntegrationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.view.RedirectView;
 
 import java.io.IOException;
-import java.net.URI;
-import java.net.http.HttpResponse;
 
 @RestController
 @RequestMapping("/v1/u/slack/integration")

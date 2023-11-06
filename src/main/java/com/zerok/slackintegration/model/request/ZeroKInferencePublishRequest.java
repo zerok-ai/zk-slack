@@ -24,4 +24,7 @@ public class ZeroKInferencePublishRequest {
     @NonNull
     private String clusterId;
 
+    @NonNull
+    private String scenarioId;
+
 }

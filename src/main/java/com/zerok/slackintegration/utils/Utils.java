@@ -1,16 +1,11 @@
 package com.zerok.slackintegration.utils;
 
 import com.zerok.slackintegration.model.request.ZeroKInferencePublishRequest;
-import org.springframework.beans.factory.annotation.Autowired;
 
-import java.lang.module.Configuration;
-import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Base64;
-import java.util.Date;
-import java.util.TimeZone;
 
 public class Utils {
 
@@ -25,7 +20,7 @@ public class Utils {
     }
 
     public static String generateDashboardIssueUrl(String zeroKDashboardUrl, ZeroKInferencePublishRequest zeroKInferencePublishRequest){
-        return String.format(zeroKDashboardUrl,zeroKInferencePublishRequest.getIssueId(),zeroKInferencePublishRequest.getIncidentId(),zeroKInferencePublishRequest.getClusterId());
+        return String.format(zeroKDashboardUrl,zeroKInferencePublishRequest.getIssueId(), zeroKInferencePublishRequest.getScenarioId(), zeroKInferencePublishRequest.getIncidentId(), zeroKInferencePublishRequest.getClusterId());
     }
 
     public static String getUTCDateTimeFromTimestamp(long timestamp){

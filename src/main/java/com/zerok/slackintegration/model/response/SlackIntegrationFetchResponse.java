@@ -1,14 +1,11 @@
 package com.zerok.slackintegration.model.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.zerok.slackintegration.model.ZkSlackButton;
 import com.zerok.slackintegration.model.enums.SlackIntegrationStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDateTime;
 
 @Data
 @Builder
